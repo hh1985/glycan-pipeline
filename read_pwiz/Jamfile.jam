@@ -1,0 +1,89 @@
+# read_pwiz/Jamfile
+
+constant VTKLIB : "E:/Project_Development/VTK5.8.0/bin/bin/Debug" ;
+constant VTKDIR : "E:/Project_Development/VTK5.8.0/vtk" ;
+constant VTKRT : "E:/Project_Development/VTK5.8.0/" ;
+project : requirements  # Included directories
+  <include>$(VTKRT)/bin
+  <include>$(VTKDIR)/Charts
+  <include>$(VTKDIR)/Common
+  <include>$(VTKDIR)/Filtering
+  <include>$(VTKDIR)/GenericFiltering
+  <include>$(VTKDIR)/Geovis
+  <include>$(VTKDIR)/Graphics
+  <include>$(VTKDIR)/Infovis
+  <include>$(VTKDIR)/Views
+  <include>$(VTKDIR)/VolumnRendering
+  <include>$(VTKDIR)/Hybrid
+  <include>$(VTKDIR)/Charts
+  <include>$(VTKDIR)/IO
+  <include>$(VTKDIR)/Imaging
+  <include>$(VTKDIR)/GenericFiltering
+  <include>$(VTKDIR)/Utilities
+  <include>$(VTKDIR)/Parallel
+  <include>$(VTKDIR)/Rendering
+  <include>$(VTKDIR)/TextAnalysis
+  <include>$(VTKDIR)/Widgets
+  <include>$(VTKDIR)/Wrapping
+  <variant>debug
+;
+lib lib_commoncxxtests : : <name>CommonCxxTests <search>$(VTKLIB) ;
+lib lib_mapreducempi : : <name>MapReduceMPI <search>$(VTKLIB) ;
+lib lib_mpistubs : : <name>mpistubs <search>$(VTKLIB) ;
+lib lib_vtkalglib : : <name>vtkalglib <search>$(VTKLIB) ;
+lib lib_vtkcharts : : <name>vtkCharts <search>$(VTKLIB) ;
+lib lib_vtkcommon : : <name>vtkCommon <search>$(VTKLIB) ;
+lib lib_vtkdicomparser : : <name>vtkDICOMParser <search>$(VTKLIB) ;
+lib lib_vtkexoiic : : <name>vtkexoIIc <search>$(VTKLIB) ;
+lib lib_vtkexpat : : <name>vtkexpat <search>$(VTKLIB) ;
+lib lib_vtkfiltering : : <name>vtkFiltering <search>$(VTKLIB) ;
+lib lib_vtkfreetype : : <name>vtkfreetype <search>$(VTKLIB) ;
+lib lib_vtkftgl : : <name>vtkftgl <search>$(VTKLIB) ;
+lib lib_vtkgenericfiltering : : <name>vtkGenericFiltering <search>$(VTKLIB) ;
+lib lib_vtkgeovis : : <name>vtkGeovis <search>$(VTKLIB) ;
+lib lib_vtkgraphics : : <name>vtkGraphics <search>$(VTKLIB) ;
+lib lib_vtkhdf5 : : <name>vtkhdf5 <search>$(VTKLIB) ;
+lib lib_vtkhybrid : : <name>vtkHybrid <search>$(VTKLIB) ;
+lib lib_vtkimaging : : <name>vtkImaging <search>$(VTKLIB) ;
+lib lib_vtkinfovis : : <name>vtkInfovis <search>$(VTKLIB) ;
+lib lib_vtkio : : <name>vtkIO <search>$(VTKLIB) ;
+lib lib_vtkjpeg : : <name>vtkjpeg <search>$(VTKLIB) ;
+lib lib_vtklibxml2 : : <name>vtklibxml2 <search>$(VTKLIB) ;
+lib lib_vtkmetaio : : <name>vtkmetaio <search>$(VTKLIB) ; 
+lib lib_vtkmfc : : <name>vtkMFC <search>$(VTKLIB) ;
+lib lib_vtknetcdf : : <name>vtkNetCDF <search>$(VTKLIB) ;
+lib lib_vtknetcdf_cxx : : <name>vtkNetCDF_cxx <search>$(VTKLIB) ;
+lib lib_vtkpng : : <name>vtkpng <search>$(VTKLIB) ;
+lib lib_vtkproj4 : : <name>vtkproj4 <search>$(VTKLIB) ;
+lib lib_vtkrendering : : <name>vtkRendering <search>$(VTKLIB) ;
+lib lib_vtksqlite : : <name>vtksqlite <search>$(VTKLIB) ;
+lib lib_vtksys : : <name>vtksys <search>$(VTKLIB) ;
+lib lib_vtktiff : : <name>vtktiff <search>$(VTKLIB) ;
+lib lib_vtkverdict : : <name>vtkverdict <search>$(VTKLIB) ;
+lib lib_vtkviews : : <name>vtkViews <search>$(VTKLIB) ;
+lib lib_vtkvolumerendering : : <name>vtkVolumeRendering <search>$(VTKLIB) ;
+lib lib_vtkwidgets : : <name>vtkWidgets <search>$(VTKLIB) ;
+lib lib_vtkzlib : : <name>vtkzlib <search>$(VTKLIB) ;
+
+exe PlotMCE3DSpectrumTest
+: PlotMCE3DSpectrumTest.cpp PlotMCE3DSpectrum.cpp lib_commoncxxtests lib_mapreducempi lib_mpistubs lib_vtkalglib lib_vtkcharts lib_vtkcommon lib_vtkdicomparser lib_vtkexoiic lib_vtkexpat lib_vtkfiltering lib_vtkfreetype lib_vtkftgl lib_vtkgenericfiltering lib_vtkgeovis lib_vtkgraphics lib_vtkhdf5 lib_vtkhybrid lib_vtkimaging lib_vtkinfovis lib_vtkio lib_vtkjpeg lib_vtklibxml2 lib_vtkmetaio lib_vtkmfc lib_vtknetcdf lib_vtknetcdf_cxx lib_vtkpng lib_vtkproj4 lib_vtkrendering lib_vtksqlite lib_vtksys lib_vtktiff lib_vtkverdict lib_vtkviews lib_vtkvolumerendering lib_vtkwidgets lib_vtkzlib
+  ../pwiz/data/msdata//pwiz_data_msdata
+  ../pwiz_tools/common
+  ../pwiz/utility/misc
+  ../pwiz/analysis/passive
+: <include>..
+;
+#unit-test-if-exists RawToMSDataTest 
+#: RawToMSDataTest.cpp RawToMSData.cpp
+#  ../pwiz/data/msdata//pwiz_data_msdata
+#  ../pwiz_tools/common
+#  ../pwiz/utility/misc
+#: <include>.. 
+#;
+#unit-test-if-exists PlotMCE3DSpectrumTest 
+#: PlotMCE3DSpectrumTest.cpp PlotMCE3DSpectrum.cpp lib_commoncxxtests lib_mapreducempi lib_mpistubs lib_vtkalglib lib_vtkcharts lib_vtkcommon lib_vtkdicomparser lib_vtkexoiic lib_vtkexpat lib_vtkfiltering lib_vtkfreetype lib_vtkftgl lib_vtkgenericfiltering lib_vtkgeovis lib_vtkgraphics lib_vtkhdf5 lib_vtkhybrid lib_vtkimaging lib_vtkinfovis lib_vtkio lib_vtkjpeg lib_vtklibxml2 lib_vtkmetaio lib_vtkmfc lib_vtknetcdf lib_vtknetcdf_cxx lib_vtkpng lib_vtkproj4 lib_vtkrendering lib_vtksqlite lib_vtksys lib_vtktiff lib_vtkverdict lib_vtkviews lib_vtkvolumerendering lib_vtkwidgets lib_vtkzlib
+#  ../pwiz/data/msdata//pwiz_data_msdata
+#  ../pwiz_tools/common
+#  ../pwiz/utility/misc
+#: <include>..
+#;
