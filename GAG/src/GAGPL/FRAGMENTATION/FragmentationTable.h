@@ -27,7 +27,8 @@
 
 namespace gag
 {
-	typedef std::pair<int, Composition> CompositionShift;
+	typedef std::pair<int, Composition> CompositionSigned;
+	typedef std::vector<CompositionSigned> CompositionShift;
 
 	class FragmentationTable: public ConfigLoader, private boost::noncopyable
 	{
@@ -44,9 +45,9 @@ namespace gag
 			void load(const std::string& filename = "../config/fragmentation.xml");
 
 			FragmentationParams getFragmentationParams(const std::string& cleavage_type) const;
-			CompositionShift getCompositionShift(const std::string& str) const;
+			CompositionSigned getCompositionSigned(const std::string& str) const;
 			CompositionShift getCleavageShift(const std::string& cleavage_type) const;
-			std::vector<CompositionShift> getCleavageShift(const std::string& cleavage_type, const std::string& dis_type) const;			 
+			CompositionShift getCleavageShift(const std::string& cleavage_type, const std::string& dis_type) const;			 
 
 	};
 }

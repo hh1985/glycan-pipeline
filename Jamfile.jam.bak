@@ -1,8 +1,0 @@
-exe RawToMSData
-: RawToMSDataTest.cpp RawToMSData.cpp 
-  ../pwiz/data/msdata//pwiz_data_msdata
-  ../pwiz_tools/common
-  ../pwiz/utility/misc
-: <include>..
-;
-

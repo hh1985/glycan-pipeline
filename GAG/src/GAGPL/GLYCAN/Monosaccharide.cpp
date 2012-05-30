@@ -158,12 +158,14 @@ namespace gag
 			throw std::runtime_error("Unqualified ring ID");
 
 		Composition ring_compo;
-		if(s1 <= 1) // Start from Carbon ID 1.
-			ring_compo = (*this).getSubCompositionByCarbonID(s1, ring_start + s2 -1);
+		if(s1 == 0 && ring_start+s2-1 == ring_end)
+			ring_compo = (*this).getSubCompositionByCarbonID(s1, internalsites.size()-1);
+		else if(s1 == 0 && ring_start+s2-1 < ring_end) // Start from Carbon ID 1.
+			ring_compo = (*this).getSubCompositionByCarbonID(s1+1, ring_start + s2 -1);
 		else if(ring_start+s2-1 < ring_end)
-			ring_compo = (*this).getSubCompositionByCarbonID(ring_start+s1-1, ring_start+s2-1);
+			ring_compo = (*this).getSubCompositionByCarbonID(ring_start+s1, ring_start+s2-1);
 		else if(ring_start+s2-1 == ring_end)
-			ring_compo = (*this).getSubCompositionByCarbonID(ring_start+s1-1, internalsites.size()-1);
+			ring_compo = (*this).getSubCompositionByCarbonID(ring_start+s1, internalsites.size()-1);
 		else 
 			throw std::runtime_error("Strange things happened!");
 		//ring_compo.updateString();

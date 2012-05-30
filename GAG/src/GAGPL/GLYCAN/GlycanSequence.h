@@ -25,10 +25,13 @@
 #include <boost/bimap.hpp>
 #include <boost/bimap/set_of.hpp>
 #include <boost/bimap/multiset_of.hpp>
+#include <boost/foreach.hpp>
 
 namespace gag
 {
 	typedef boost::bimap< boost::bimaps::set_of<size_t, std::less<size_t> >, boost::bimaps::multiset_of<size_t> > BranchMap;
+	typedef BranchMap::left_map::const_iterator left_const_iterator;
+	typedef BranchMap::right_map::const_iterator right_const_iterator;
 
 	typedef std::map<size_t, size_t> BranchDescendants;
 

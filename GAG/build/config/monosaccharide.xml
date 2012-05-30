@@ -115,7 +115,7 @@
 		<Monosaccharide>
 			<Symbol>GlcNAc</Symbol>
 			<Name>N-Acetylglucosamine</Name>
-			<Composition>C6H15O6N</Composition>
+			<Composition>C8H15NO6</Composition>
 			<Ring>
 				<Start>1</Start>
 				<End>5</End>
@@ -132,7 +132,7 @@
 					</Subset>
 				</Site>
 				<Site>
-					<Composition>CHNHOOCCH3</Composition>
+					<Composition>CHNHOCCH3</Composition>
 					<Subset>
 						<FunctionalGroup>H</FunctionalGroup>
 						<FunctionalGroup>NH2</FunctionalGroup>
@@ -189,7 +189,7 @@
 					</Subset>
 				</Site>
 				<Site>
-					<Composition>CNH2OOCCH3</Composition>
+					<Composition>CNH2OCCH3</Composition>
 					<Subset>
 						<FunctionalGroup>H</FunctionalGroup>
 						<FunctionalGroup>NH2</FunctionalGroup>
@@ -229,7 +229,7 @@
 		<Monosaccharide>
 			<Symbol>NeuAc</Symbol>
 			<Name>N-Acetylneuraminic acid</Name>
-			<Composition>C11O9NH19</Composition>
+			<Composition>C11H19NO9</Composition>
 			<Ring>
 				<Start>2</Start>
 				<End>6</End>
@@ -265,7 +265,7 @@
 					</Subset>
 				</Site>
 				<Site>
-					<Composition>CHNHOOCCH3</Composition>
+					<Composition>CHNHOCCH3</Composition>
 					<Subset>
 						<FunctionalGroup>H</FunctionalGroup>
 						<FunctionalGroup>NH</FunctionalGroup>
