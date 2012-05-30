@@ -56,7 +56,12 @@ namespace gag
 			//std::map<std::string, std::vector<FragmentPosition> > cleavage_sites;
 			CleavageCollection cleavage_sites;
 			//CleavageShift cleavage_correction;
-			
+		
+		protected:
+			// A generic function which can be called by generate[X]Type() ([X] = X,Y,Z,A,B,C here)
+			// using information from cleavage_sites.
+			Composition updateFragmentComposition(const FragmentPosition& fp);
+		
 		public:
 			// Constructor.
 			Fragment(GlycanSequence& seq)
@@ -64,19 +69,11 @@ namespace gag
 			{
 			}
 
+			// Check if the cleavage is a type of internal cleavage.
+			bool InternalCleavage(const FragmentPosition& site);
+
 			// Repeatedly store all the fragmentation information.
 			void setFragmentation(const std::string& type, const FragmentPosition& site);
-
-			// A generic function which can be called by generate[X]Type() ([X] = X,Y,Z,A,B,C here)
-			// using information from cleavage_sites.
-			Composition getFragmentComposition(FragmentPosition& fp);
-
-			void generateXType();
-			void generateYType();
-			void generateZType();
-			void generateAType();
-			void generateBType();
-			void generateCType();
 
 			// A generic function for fragmentation.
 			void updateFragmentByType(const std::string& type);
@@ -86,9 +83,8 @@ namespace gag
 			// 2. Update the mass and composition of that Branch.
 			// 3. Clear the composition and mass of all related branch.
 			// 4. Recalculate the overall composition and mass.
-			void update();
+			// void update();
 
-			void correctMassForCAD(const std::string& ionization);
 
   };
 

@@ -41,7 +41,7 @@ void exploreBranch(Branch& bc)
 	}
 	
 }
-void printCompositionShift(const CompositionShift& cs)
+void printCompositionShift(const CompositionSigned& cs)
 {
 	cout << "Sign: " << cs.first << endl;
 	cout << "Composition: " << cs.second.getCompositionString() << endl;
@@ -66,62 +66,62 @@ int main()
 	cout << "X cleavage" << endl;
 	FragmentationParams& fpx = ft.getFragmentationParams("X");
 	CompositionShift csx = ft.getCleavageShift("X");
-	std::vector<CompositionShift> csx_vec = ft.getCleavageShift("X","CID");
-	printCompositionShift(csx);
+	CompositionShift csx_vec = ft.getCleavageShift("X","CID");
+	for(size_t i=0; i < csx.size(); i++)
+		printCompositionShift(csx.at(i));
 	for(size_t i=0; i < csx_vec.size(); i++)
-	{
 		printCompositionShift(csx_vec.at(i));
-	}
+
 	// Y cleavage.
 	cout << "Y cleavage" << endl;
 	FragmentationParams& fpy = ft.getFragmentationParams("Y");
 	CompositionShift csy = ft.getCleavageShift("Y");
-	std::vector<CompositionShift> csy_vec = ft.getCleavageShift("Y","CID");
-	printCompositionShift(csy);
+	CompositionShift csy_vec = ft.getCleavageShift("Y","CID");
+	for(size_t i=0; i < csy.size(); i++)
+		printCompositionShift(csy.at(i));
 	for(size_t i=0; i < csy_vec.size(); i++)
-	{
 		printCompositionShift(csy_vec.at(i));
-	}
+
 	// Z cleavage.
 	cout << "Z cleavage" << endl;
 	FragmentationParams& fpz = ft.getFragmentationParams("Z");
 	CompositionShift csz = ft.getCleavageShift("Z");
-	std::vector<CompositionShift> csz_vec = ft.getCleavageShift("Z","CID");
-	printCompositionShift(csz);
+	CompositionShift csz_vec = ft.getCleavageShift("Z","CID");
+	for(size_t i=0; i < csz.size(); i++)
+		printCompositionShift(csz.at(i));
 	for(size_t i=0; i < csz_vec.size(); i++)
-	{
 		printCompositionShift(csz_vec.at(i));
-	}
+
 	// A cleavage.
 	cout << "A cleavage" << endl;
 	FragmentationParams& fpa = ft.getFragmentationParams("A");
 	CompositionShift csa = ft.getCleavageShift("A");
-	std::vector<CompositionShift> csa_vec = ft.getCleavageShift("A","CID");
-	printCompositionShift(csa);
+	CompositionShift csa_vec = ft.getCleavageShift("A","CID");
+	for(size_t i=0; i < csa.size(); i++)
+		printCompositionShift(csa.at(i));
 	for(size_t i=0; i < csa_vec.size(); i++)
-	{
 		printCompositionShift(csa_vec.at(i));
-	}
+
 	// B cleavage.
 	cout << "B cleavage" << endl;
 	FragmentationParams& fpb = ft.getFragmentationParams("B");
 	CompositionShift csb = ft.getCleavageShift("B");
-	std::vector<CompositionShift> csb_vec = ft.getCleavageShift("B","CID");
-	printCompositionShift(csb);
-	for(size_t i=0; i < csb_vec.size(); i++)
-	{
+	CompositionShift csb_vec = ft.getCleavageShift("B","CID");
+	
+	for(size_t i=0; i < csb.size(); i++)
+		printCompositionShift(csb.at(i));
+	for(size_t i=0; i < csb_vec.size(); i++)		
 		printCompositionShift(csb_vec.at(i));
-	}
+
 	// C cleavage.
 	cout << "C cleavage" << endl;
 	FragmentationParams& fpc = ft.getFragmentationParams("C");
 	CompositionShift csc = ft.getCleavageShift("C");
-	std::vector<CompositionShift> csc_vec = ft.getCleavageShift("C","CID");
-	printCompositionShift(csc);
+	CompositionShift csc_vec = ft.getCleavageShift("C","CID");
+	for(size_t i=0; i < csc.size(); i++)
+		printCompositionShift(csc.at(i));
 	for(size_t i=0; i < csc_vec.size(); i++)
-	{
 		printCompositionShift(csc_vec.at(i));
-	}
 
 	/* Construct a glycan sequence */
 	GlycanSequence gs;
@@ -149,6 +149,7 @@ int main()
 	Linkage lk3(0,1,6,"alpha");
 	bc3.addLinkage(lk3);
 	gs.addBranch(bc3);
+	// Be careful that the modification occurs on the unit on the glycan sequence, not on the single branch.
 	gs.addBranchLink(0,2);
 	gs.addBranchLink(1,2);
 	gs.updateChildrenIDs(2);
@@ -183,6 +184,7 @@ int main()
 	gs.addBranchLink(3,5);
 	gs.addBranchLink(4,5);
 	gs.updateChildrenIDs(5);
+	//gs.update();
 
 	for(std::vector<Branch>::iterator iter = gs.getBranches().begin(); iter != gs.getBranches().end(); iter++)
 	{
@@ -190,14 +192,40 @@ int main()
 		cout << "Children: " << gs.getDescendantBranchIDs(iter->getBranchID()).first << "-" << gs.getDescendantBranchIDs(iter->getBranchID()).second << endl;
 	}
 
-	Fragment frag(gs);
-	FragmentPosition fp = {5,0,2,4};
-	frag.setFragmentation("X", fp);
-	frag.updateFragmentByType("X");
+	cout << "Cleavage: 2,4A(GlcNAc)/1,3X(Man)" << endl;
+	Fragment frag1(gs);
+	FragmentPosition fp11 = {5,2,2,4};
+	frag1.setFragmentation("A", fp11);
+	FragmentPosition fp12 = {2,0,1,3};
+	frag1.setFragmentation("X", fp12);
+	std::cout << "Composition: " << frag1.getCompositionString() << " " << "Mass: " << frag1.getMass() << std::endl;
 
-	// X type cleavage.
-	std::cout << "Composition: " << frag.getCompositionString() << std::endl;
-	std::cout << "Mass: " << frag.getMass() << std::endl;
-
+	cout << "Cleavage: Z 1,5X(Man)" << endl;
+	Fragment frag2(gs);
+	FragmentPosition fp21 = {3,0,0,5};
+	FragmentPosition fp22 = {0,0,1,5};
+	frag2.setFragmentation("Z", fp21);
+	frag2.setFragmentation("X", fp22);
+	cout << "Composition: " << frag2.getCompositionString() << " " << "Mass: " << frag2.getMass() << endl;
+	
+	cout << "Cleavage: 1,3X(GlcNAc) 1,4X(Man)" << endl;
+	Fragment frag3(gs);
+	FragmentPosition fp31 = {5,1,1,3};
+	FragmentPosition fp32 = {2,0,1,4};
+	frag3.setFragmentation("X", fp31);
+	frag3.setFragmentation("X", fp32);
+	cout << "Composition: " << frag3.getCompositionString() << " " << "Mass: " << frag3.getMass() << endl;
+	
+	cout << "Cleavage: 0,3X(GlcNAc) 1,4X(Man)" << endl;
+	Fragment frag4(gs);
+	FragmentPosition fp41 = {3,0,0,3};
+	FragmentPosition fp42 = {2,0,1,4};
+	frag3.setFragmentation("X", fp41);
+	frag3.setFragmentation("X", fp42);
+	cout << "Composition: " << frag4.getCompositionString() << " " << "Mass: " << frag4.getMass() << endl;	
+	
+	
+	
+	
 	return EXIT_SUCCESS;
 }

@@ -32,6 +32,7 @@ namespace gag
 		Branch& bc = (*this).getBranchByID(nre_id);
 		Linkage& lk = (*this).getBranchByID(re_id).getLinkages().back();
 		bc.removeModification(0,lk.end,"OH","OH");
+		compo.deduct("OH");
 	}
 
 	void GlycanSequence::updateChildrenIDs(const size_t branch_id)

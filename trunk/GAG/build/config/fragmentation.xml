@@ -5,7 +5,7 @@
 		<Type>
 			<Name>X</Name>
 			<Shift>
-				<Value></Value>
+				<Value>-H2</Value>
 				<Dissociation>
 					<Name>CID</Name>
 					<Value></Value>
@@ -15,17 +15,17 @@
 		<Type>
 			<Name>Y</Name>
 			<Shift>
-				<Value>O</Value>
+				<Value>-OH</Value>
 				<Dissociation>
 					<Name>CID</Name>
-					<Value>H</Value>
+					<Value>-H</Value>
 				</Dissociation>
 			</Shift>
 		</Type>
 		<Type>
 			<Name>Z</Name>
 			<Shift>
-				<Value></Value>
+				<Value>-H</Value>
 				<Dissociation>
 					<Name>CID</Name>
 					<Value>-H</Value>
@@ -35,7 +35,7 @@
 		<Type>
 			<Name>A</Name>
 			<Shift>
-				<Value></Value>
+				<Value>H2</Value>
 				<Dissociation>
 					<Name>CID</Name>
 					<Value></Value>
@@ -46,6 +46,7 @@
 			<Name>B</Name>
 			<Shift>
 				<Value>-O</Value>
+				<Value>H</Value>
 				<Dissociation>
 					<Name>CID</Name>
 					<Value>-H</Value>
@@ -55,7 +56,7 @@
 		<Type>
 			<Name>C</Name>
 			<Shift>
-				<Value></Value>
+				<Value>H</Value>
 				<Dissociation>
 					<Name>CID</Name>
 					<Value>-H</Value>

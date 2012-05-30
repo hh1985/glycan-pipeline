@@ -103,11 +103,10 @@
 		<FunctionalGroup>
 			<Symbol>Ac</Symbol>
 			<Name>acetate</Name>
-			<Composition>C2H3O2</Composition>
+			<Composition>C2H3O</Composition>
 			<Sites>
 				<Composition>CH3</Composition>
 				<Composition>CO</Composition>
-				<Composition>O</Composition>
 			</Sites>
 		</FunctionalGroup>
 		<FunctionalGroup>

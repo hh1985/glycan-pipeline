@@ -29,7 +29,8 @@ namespace gag
 	struct FragmentationParams
 	{
 			std::string type;
-			std::string cleavage_shift;
+			std::vector<std::string> cleavage_shift;
+			// Dissociation name and corresponding shifts.
 			std::map<std::string, std::vector<std::string> > dis_shift;			
 	};
 }
