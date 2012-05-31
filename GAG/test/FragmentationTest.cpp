@@ -220,12 +220,40 @@ int main()
 	Fragment frag4(gs);
 	FragmentPosition fp41 = {3,0,0,3};
 	FragmentPosition fp42 = {2,0,1,4};
-	frag3.setFragmentation("X", fp41);
-	frag3.setFragmentation("X", fp42);
+	frag4.setFragmentation("X", fp41);
+	frag4.setFragmentation("X", fp42);
 	cout << "Composition: " << frag4.getCompositionString() << " " << "Mass: " << frag4.getMass() << endl;	
 	
-	
-	
-	
+	// GAG sequence
+	Branch bc_hs(0);
+	Monosaccharide ms_hs0 = mut.getMonosaccharideBySymbol("GlcA");
+	bc_hs.addUnit(ms_hs0);
+	Linkage lk_hs0(0,1,4,"alpha");
+	bc_hs.addLinkage(lk_hs0);
+	Monosaccharide ms_hs1 = mut.getMonosaccharideBySymbol("GlcN");
+	bc_hs.addUnit(ms_hs1);
+	Linkage lk_hs1(1,1,4,"belta");
+	bc_hs.addLinkage(lk_hs1);
+	Monosaccharide ms_hs2 = mut.getMonosaccharideBySymbol("GlcA");
+	bc_hs.addUnit(ms_hs2);
+	Linkage lk_hs2(2,1,4,"alpha");
+	bc_hs.addLinkage(lk_hs2);
+	Monosaccharide ms_hs3 = mut.getMonosaccharideBySymbol("GlcNAc");
+	bc_hs.addUnit(ms_hs3);
+	// Add modification.
+	bc_hs.addModification(1,2,"NH2","H2SO4","H2O");
+	bc_hs.addModification(1,6,"OH","H2SO4","H2O");
+	bc_hs.addModification(2,2,"OH","H2SO4","H2O");
+	bc_hs.addModification(3,6,"OH","H2SO4","H2O");
+	GlycanSequence gag;
+	gag.addBranch(bc_hs);
+	cout << "Get GAG composition: " << gag.getCompositionString() << endl;
+	cout << "Get GAG mass: " << gag.getMass() << endl;
+
+	Fragment frag_hs(gag);
+	FragmentPosition fp_hs1 = {0,0,2,4};
+	frag_hs.setFragmentation("X",fp_hs1);
+	cout << "Composition: " << frag_hs.getCompositionString() << " Mass: " << frag_hs.getMass() << endl;
+
 	return EXIT_SUCCESS;
 }

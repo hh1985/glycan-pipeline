@@ -60,7 +60,7 @@ namespace gag
 		protected:
 			// A generic function which can be called by generate[X]Type() ([X] = X,Y,Z,A,B,C here)
 			// using information from cleavage_sites.
-			Composition updateFragmentComposition(const FragmentPosition& fp);
+			Composition updateFragmentComposition(const FragmentPosition& fp, bool cw = true/* clockwise */);
 		
 		public:
 			// Constructor.
@@ -70,13 +70,13 @@ namespace gag
 			}
 
 			// Check if the cleavage is a type of internal cleavage.
-			bool InternalCleavage(const FragmentPosition& site);
+			// bool isInternalCleavage(const FragmentPosition& fp);
 
 			// Repeatedly store all the fragmentation information.
 			void setFragmentation(const std::string& type, const FragmentPosition& site);
 
 			// A generic function for fragmentation.
-			void updateFragmentByType(const std::string& type);
+			//void updateFragmentByType(const std::string& type);
 	
 			// The update process can be divided into several steps:
 			// 1. Locate the cleavage position using information from Fragmentation.

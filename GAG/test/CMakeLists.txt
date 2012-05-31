@@ -1,7 +1,7 @@
 ## DIRECTORY: /GAG/test
 SET(EXTERN_INCLUDE
 	D:/Development/boost/boost_1_49_0 # Boost.
-	E:/Sync/Dropbox/Codes/glycan-pipeline/GAG/src
+	E:/Sync/Dropbox/Codes/glycan_pipeline/GAG/src
 	)
 	
 SET(CHEMISTRY 

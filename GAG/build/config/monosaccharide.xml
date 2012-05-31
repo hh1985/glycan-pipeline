@@ -56,10 +56,10 @@
 				</Site>
 			</Sites>
 		</Monosaccharide>
-<Monosaccharide>
+		<Monosaccharide>
 			<Symbol>GlcN</Symbol>
 			<Name>Glucosamine</Name>
-			<Composition>C6H10O7</Composition>
+			<Composition>C6H13NO5</Composition>
 			<Ring>
 				<Start>1</Start>
 				<End>5</End>
