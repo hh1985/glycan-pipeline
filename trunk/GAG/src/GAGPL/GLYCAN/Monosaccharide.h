@@ -45,6 +45,14 @@ namespace gag
 				: Unit(str), symbol(sb), name(nm), ring_start(start), ring_end(end),internalsites()
 			{}
 
+			inline const size_t& getRingStart() const
+			{
+				return ring_start;
+			}
+			inline const size_t& getRingEnd() const
+			{
+				return ring_end;
+			}
 			inline const std::string& getSymbol() const 
 			{
 				return symbol;
@@ -88,8 +96,8 @@ namespace gag
 			}
 
 			// No reference is allowed for temporary variable.
-			Composition getSubCompositionByCarbonID(const size_t s1, const size_t s2);
-			Composition getSubCompositionByRingID(const size_t s1, const size_t s2);
+			Composition getSubCompositionByCarbonID(const size_t& s1, const size_t& s2);
+			Composition getSubCompositionByRingID(const size_t& s1, const size_t& s2);
 
 			/* It might be better to also add the functions into glycan sequence object.*/
 			
