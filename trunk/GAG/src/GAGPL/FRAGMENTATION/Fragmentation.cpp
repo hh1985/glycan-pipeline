@@ -22,33 +22,36 @@
 namespace gag
 {
  // // if true, simply remove the corresponding part instead of recalculation.
-	//bool Fragment::isInternalCleavage(const FragmentPosition& fp)
-	//{
-	//	Branch& bc = glyco_seq.getBranchByID(fp.branch_id);
-	//	if(fp.mono_id != 0) { // Within branch.
-	//		if((bc.getLinkages().at(fp.mono_id-1).end > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second)&& bc.getLinkages().at(fp.mono_id).start <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)) ||
-	//			((bc.getLinkages().at(fp.mono_id-1).end <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second)&& bc.getLinkages().at(fp.mono_id).start > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)))
-	//			return true;
-	//		else 
-	//			return false;
-	//	} else {
-	//		BranchMap::right_const_iterator right_iter = glyco_seq.getBranchLinks().right.find(fp.branch_id);
-	//		if(right_iter != glyco_seq.getBranchLinks().right.end()){ // No leaf
-	//			if((glyco_seq.getBranchByID(fp.branch_id-1).getLinkages().back().end > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second) && bc.getLinkages().at(fp.mono_id).start <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)) ||
-	//				(glyco_seq.getBranchByID(fp.branch_id-1).getLinkages().back().end <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second) && bc.getLinkages().at(fp.mono_id).start > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)))
-	//				return true;
-	//			else 
-	//				return false;
-	//		} else { // Leaf.
-	//			if(bc.getLinkages().at(fp.mono_id).start > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first) && 
-	//				bc.getLinkages().at(fp.mono_id).start < bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second))
-	//				return true;
-	//			else 
-	//				return false;
-	//		}
-	//	}
+	// Only works for A type.
+	bool Fragment::isInternalCleavage(const FragmentPosition& fp)
+	{
+		Branch& bc = glyco_seq.getBranchByID(fp.branch_id);
+		if(fp.mono_id != 0) { // Within branch.
+			if(bc.getLinkages().size() < fp.mono_id+1) // Reducing end;
+				return true;
+			if((bc.getLinkages().at(fp.mono_id-1).end > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second)&& bc.getLinkages().at(fp.mono_id).start <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)) ||
+				(bc.getLinkages().at(fp.mono_id-1).end <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second)&& bc.getLinkages().at(fp.mono_id).start > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)))
+				return true;
+			else 
+				return false;
+		} else {
+			BranchMap::right_const_iterator right_iter = glyco_seq.getBranchLinks().right.find(fp.branch_id);
+			if(right_iter != glyco_seq.getBranchLinks().right.end()){ // No leaf
+				if((glyco_seq.getBranchByID(fp.branch_id-1).getLinkages().back().end > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second) && bc.getLinkages().at(fp.mono_id).start <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)) ||
+					(glyco_seq.getBranchByID(fp.branch_id-1).getLinkages().back().end <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second) && bc.getLinkages().at(fp.mono_id).start > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first)))
+					return true;
+				else 
+					return false;
+			} else { // Leaf.
+				if(bc.getLinkages().at(fp.mono_id).start > bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_first) && 
+					bc.getLinkages().at(fp.mono_id).start < bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second))
+					return true;
+				else 
+					return false;
+			}
+		}
 
-	//}
+	}
 	// Record cleavage type and fragmentation position.
 	// 1. Each time when the function is called, the validity of the cleavage should be checked.
 	// 2. The composition should be updated immediately.
@@ -121,7 +124,7 @@ namespace gag
 		if(cw == true){
 			tmp_compo.add(cp1);
 			if(fp.mono_id != 0) {
-				if(bc.getLinkages().at(fp.mono_id-1).end <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second)) {
+				if(bc.getLinkages().at(fp.mono_id-1).end <= bc.getUnitByID(fp.mono_id).getCarbonID(fp.xring_second) || fp.xring_second == 0) {
 					tmp_compo.add(glyco_seq.getSubTreeComposition(fp.branch_id));
 					tmp_compo.add(bc.getSubComposition(0,fp.mono_id-1));
 				}
