@@ -22,6 +22,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <GAGPL/CHEMISTRY/Composition.h>
 
 namespace gag
 {
@@ -31,7 +32,9 @@ namespace gag
 			std::string type;
 			std::vector<std::string> cleavage_shift;
 			// Dissociation name and corresponding shifts.
-			std::map<std::string, std::vector<std::string> > dis_shift;			
+			std::map<std::string, std::vector<std::string> > dis_shift;	
+			// Internal cleavage might be considered as neutral loss, which reduces the number of fragments.
+			std::vector<Composition> neutral_loss; 
 	};
 }
 

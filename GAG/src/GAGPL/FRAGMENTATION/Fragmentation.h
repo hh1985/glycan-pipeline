@@ -26,7 +26,9 @@
 namespace gag
 {
   //typedef std::vector<std::vector<Branch> > Fragments;
-  
+	enum re_cleavage {RE_INTACT, A, B, C, RE_N};
+	enum nre_cleavage {NRE_INTACT, X, Y, Z, NRE_N};
+
 	struct FragmentPosition
 	{
 		// The branch ID should follow the leaf-to-root style.
@@ -70,11 +72,14 @@ namespace gag
 			}
 
 			// Check if the cleavage is a type of internal cleavage.
-			// bool isInternalCleavage(const FragmentPosition& fp);
+			bool isInternalCleavage(const FragmentPosition& fp);
 
 			// Repeatedly store all the fragmentation information.
 			void setFragmentation(const std::string& type, const FragmentPosition& site);
-
+			inline const CleavageCollection& getCleavages() const
+			{
+				return cleavage_sites;
+			}
 			// A generic function for fragmentation.
 			//void updateFragmentByType(const std::string& type);
 	

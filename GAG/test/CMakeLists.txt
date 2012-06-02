@@ -56,6 +56,10 @@ SET(FRAGMENTATION
 	../src/GAGPL/FRAGMENTATION/FragmentationParams.h
 	../src/GAGPL/FRAGMENTATION/FragmentationTable.h ../src/GAGPL/FRAGMENTATION/FragmentationTable.cpp
 )
+SET(LIBRARY
+	${FRAGMENTATION}
+	../src/GAGPL/GAGLIBRARY/LibraryTree.h ../src/GAGPL/GAGLIBRARY/LibraryTree.cpp
+)
 INCLUDE_DIRECTORIES(. ${EXTERN_INCLUDE} ../src/GAGPL/CHEMISTRY)
 
 ADD_EXECUTABLE(periodictable ${PERIODICTABLE} PeriodicTableTest.cpp)
@@ -65,6 +69,7 @@ ADD_EXECUTABLE(monosaccharide ${MONOSACCHARIDE} MonosaccharideTableTest.cpp)
 ADD_EXECUTABLE(branch ${BRANCH} BranchTest.cpp)
 ADD_EXECUTABLE(glycanseq ${GLYCANSEQUENCE} GlycanSequenceTest.cpp)
 ADD_EXECUTABLE(fragmentation ${FRAGMENTATION} FragmentationTest.cpp)
+ADD_EXECUTABLE(library ${LIBRARY} LibraryTreeTest.cpp)
 
 #ENABLE_TESTING()
 #ADD_TEST(01_composition composition)
