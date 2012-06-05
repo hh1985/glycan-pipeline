@@ -4,6 +4,9 @@
 #include <GAGPL/FRAGMENTATION/FragmentationTable.h>
 #include <GAGPL/FRAGMENTATION/Fragmentation.h>
 #include <iostream>
+#include <cmath>
+#include <boost/xpressive/xpressive.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace std;
 using namespace gag;
@@ -47,19 +50,62 @@ void printCompositionShift(const CompositionSigned& cs)
 	cout << "Composition: " << cs.second.getCompositionString() << endl;
 }
 
-//void printFragment(const Fragment fg, const std::string& type, const FragmentPosition& fp)
-//{
-//	Fragment ft = fg;
-//	ft.setFragmentation(type, fp);
-//	cout << "Type: " << type << endl;
-//	if(type == "A" || type == "X")
-//		cout << "Position: " << fp.xring_first << "--" << fp.xring_second << endl;
-//	cout << "Composition: " << ft.getCompositionString() << " Mass: " << ft.getMass() << endl;
-//}
+
+
+void processMassLoss(MassLossWindow& mlw, size_t cur, Composition& cp)
+{	
+	MassLoss& ml = mlw.at(cur);
+	// Go over all number of mass loss.
+	// For SO3, the upper limit is decided by the number of sulfate group.
+	int max = abs(ml.upper);
+	if(ml.loss_compo == Composition("SO3")) {
+		std::map<string, int>::const_iterator iter = cp.get().find("S");
+		if(iter != cp.get().end())
+			max = iter->second;
+		else
+			max = 0;
+	}
+	for(int i = ml.lower; i <= max; i++)
+	{
+		Composition tmp_compo = cp;
+		// e.g. 2H2O
+		if(i != 0)
+			cout << ml.loss_compo.getCompositionString() << ":" << i << " ";
+		
+		if(i < 0){
+			for(int j = 0; j < abs(i); j++) {					
+				tmp_compo.add(ml.loss_compo);
+			}
+		} else if(i > 0) {
+			if((tmp_compo.getMass() - i * ml.loss_compo.getMass()) < 0.0)
+				break;
+			for(int j = 0; j < i; j++) {
+				tmp_compo.deduct(ml.loss_compo);
+			}
+		}
+		if(cur == mlw.size()-1) {
+			// The end. Print out the composition and mass.
+			cout << tmp_compo.getCompositionString() << " ";
+			cout << setprecision(6) << tmp_compo.getMass() << "\n  ";
+		
+		} else {
+			processMassLoss(mlw, cur+1,tmp_compo);
+		} 
+
+	}
+	
+	return;
+}
+
 void printFragment(Fragment& fg)
 {
+	FragmentationTable& ft = FragmentationTable::Instance();
+	ft.load();
+
+	MassLossWindow mlw = ft.getMassLoss();
+
 	const CleavageCollection& cc = fg.getCleavages();
-	//cout << "Cleavage:";
+	
 	for(CleavageCollection::const_iterator const_iter = cc.begin(); const_iter != cc.end(); const_iter++ )
 	{
 		for(std::vector<FragmentPosition>::const_iterator const_iter2 = const_iter->second.begin(); const_iter2 != const_iter->second.end(); const_iter2++)
@@ -69,10 +115,17 @@ void printFragment(Fragment& fg)
 				cout << ":" << const_iter2->xring_first << "-" << const_iter2->xring_second;
 		}
 	}
-	//cout << endl;
-	cout << "\t" << fg.getCompositionString() << "\t" << fg.getMass() << endl;
-	//cout << "\t" << fg.getMass() << endl;
+	cout << "\t" << fg.getCompositionString() << "\t" << setprecision(10) << fg.getMass() << endl;
+	if(fg.getMass() > 200.0) {
+		Composition tmp_compo = fg.getComposition();
+		processMassLoss(mlw, 0, tmp_compo);	
+	}
+
+	cout << endl;
 }
+
+
+
 void addNRECleavage(Fragment& fg, int re_cl, size_t mono_id)
 {
 	for(int nre_cl = NRE_INTACT; nre_cl < NRE_N; nre_cl++)
@@ -115,6 +168,111 @@ void addNRECleavage(Fragment& fg, int re_cl, size_t mono_id)
 			
 		}
 	}
+}
+
+void readSequence(std::vector<GlycanSequence>& gag_list)
+{
+	FunctionalGroupTable& fgt = FunctionalGroupTable::Instance();
+	fgt.load();
+
+	// Load Monosaccharide unit Table.
+	MonosaccharideUnitTable& mut = MonosaccharideUnitTable::Instance();
+	mut.load();
+
+	// Load Fragmentation parameters.
+	FragmentationTable& ft = FragmentationTable::Instance();
+	ft.load();
+
+	ifstream seqfile;
+	string ROW, flag;
+	seqfile.open("../../test/input_test.txt");
+
+	using namespace boost::xpressive;
+	GlycanSequence* gs_pt(new GlycanSequence);
+	Branch* bc_pt(new Branch);
+
+	sregex res_ori = '>' >> (s1= +_w);
+
+	smatch what;
+	
+	if(seqfile.is_open()) {
+		while(!seqfile.eof()) {
+			getline(seqfile, ROW);
+			//Define the regex.
+			//sregex rex = sregex::compile("^>(\w+)\s?(\d*)");
+
+
+			if(regex_search(ROW, what, res_ori)) {
+				flag = what[1];
+				//cout << flag << endl;
+				if(boost::lexical_cast<std::string>(what[1]) == "END"){
+					gs_pt->update();
+					gag_list.push_back(*gs_pt);
+					delete gs_pt;
+				} else if(boost::lexical_cast<std::string>(what[1]) == "SEQUENCE" && !gag_list.empty()){
+					gs_pt = new GlycanSequence();				
+				} else if(what[1] == "MODIFICATION") {
+					// Add branch.
+					gs_pt->addBranch(*bc_pt);
+					delete bc_pt;				
+				}
+					
+			} else {
+				if(flag == "SEQUENCE") { // Dealing with branches.				
+				//bc_pt.release();
+				
+				// Split the sequence into modules.
+					sregex res = +_s;
+					sregex_token_iterator cur(ROW.begin(), ROW.end(), res, -1), end;
+					//Branch bc(*begin);
+
+					size_t mono_id = 0;
+					bc_pt = new Branch(boost::lexical_cast<size_t>(*cur));
+					
+					for(++cur; cur != end; cur++)
+					{	
+						std::string str = *cur;
+						res = bos >> +_w >> eos;
+						if(regex_match(str, what, res)) {
+							Monosaccharide ms = mut.getMonosaccharideBySymbol(str);
+							bc_pt->addUnit(ms);				
+						} else {
+							// If linkage.
+							res = bos >> (s1= +_w) >> (s2= +_d) >> '-' >> (s3= +_d) >> eos;
+							if(regex_match(str, what, res)){
+								Linkage lk(mono_id, boost::lexical_cast<size_t>(what[2]), boost::lexical_cast<size_t>(what[3]), boost::lexical_cast<std::string>(what[1]));
+								bc_pt->addLinkage(lk);
+								mono_id++;
+							}
+						}
+					}
+				} else if(flag == "MODIFICATION"){
+					
+					
+					sregex res = bos >> (s1= +_d) >> '\t' >> (s2= +_d) >> '\t' >> (s3= +_d) >> (s4= _w) >> (s5= +_w); 
+					if(regex_match(ROW, what, res)){
+						//bc_hs.addModification(0,2,"NH2","H2SO4","H2O");
+
+						std::string mod;
+						if(what[5] == "S")
+							mod = "H2SO4";
+						else if(what[5] == "Me")
+							mod = "CH3OH";
+
+						if(what[4] == "O"){
+							gs_pt->getBranchByID(boost::lexical_cast<size_t>(what[1])).addModification(boost::lexical_cast<size_t>(what[2]),boost::lexical_cast<size_t>(what[3]), "OH", mod, "H2O");
+						} else if(what[4] == "N") {
+							gs_pt->getBranchByID(boost::lexical_cast<size_t>(what[1])).addModification(boost::lexical_cast<size_t>(what[2]),boost::lexical_cast<size_t>(what[3]), "NH2", mod, "H2O");
+						}
+					}
+
+				} 
+			
+			} 
+			
+		}
+	}
+	seqfile.close();
 }
 
 void addCleavage(Fragment& fg)
@@ -165,17 +323,7 @@ void Cleavages(GlycanSequence& seq)
 
 int main()
 {
-// Load Functional Group Table.
-	FunctionalGroupTable& fgt = FunctionalGroupTable::Instance();
-	fgt.load();
-
-	// Load Monosaccharide unit Table.
-	MonosaccharideUnitTable& mut = MonosaccharideUnitTable::Instance();
-	mut.load();
-
-	// Load Fragmentation parameters.
-	FragmentationTable& ft = FragmentationTable::Instance();
-	ft.load();
+	//load();
 
 	///* Test Fragmentation parameters. */
 	//// X cleavage.
@@ -341,114 +489,49 @@ int main()
 	//cout << "Composition: " << frag4.getCompositionString() << " " << "Mass: " << frag4.getMass() << endl;	
 	
 	// GAG sequence
-	Branch bc_hs(0);
-	Monosaccharide ms_hs0 = mut.getMonosaccharideBySymbol("GlcN");
-	bc_hs.addUnit(ms_hs0);
-	Linkage lk_hs0(0,1,4,"alpha");
-	bc_hs.addLinkage(lk_hs0);
-	Monosaccharide ms_hs1 = mut.getMonosaccharideBySymbol("GlcA");
-	bc_hs.addUnit(ms_hs1);
-	Linkage lk_hs1(1,1,4,"belta");
-	bc_hs.addLinkage(lk_hs1);
-	Monosaccharide ms_hs2 = mut.getMonosaccharideBySymbol("GlcN");
-	bc_hs.addUnit(ms_hs2);
-	Linkage lk_hs2(2,1,4,"alpha");
-	bc_hs.addLinkage(lk_hs2);
-	Monosaccharide ms_hs3 = mut.getMonosaccharideBySymbol("GlcA");
-	bc_hs.addUnit(ms_hs3);
-	Linkage lk_hs3(3,1,4,"belta");
-	bc_hs.addLinkage(lk_hs3);
-	Monosaccharide ms_hs4 = mut.getMonosaccharideBySymbol("GlcN");
-	bc_hs.addUnit(ms_hs4);
-	// Add modification.
-	bc_hs.addModification(0,2,"NH2","H2SO4","H2O");
-	bc_hs.addModification(0,6,"OH","H2SO4","H2O");
-	bc_hs.addModification(2,2,"NH2","H2SO4","H2O");
-	bc_hs.addModification(2,3,"OH","H2SO4","H2O");
-	bc_hs.addModification(2,6,"OH","H2SO4","H2O");
-	bc_hs.addModification(3,2,"OH","H2SO4","H2O");
-	bc_hs.addModification(4,2,"NH2","H2SO4","H2O");
-	bc_hs.addModification(4,6,"OH","H2SO4","H2O");
-	bc_hs.addModification(4,1,"OH","CH3OH","H2O");
+	//Branch bc_hs(0);
+	//Monosaccharide ms_hs0 = mut.getMonosaccharideBySymbol("GlcN");
+	//bc_hs.addUnit(ms_hs0);
+	//Linkage lk_hs0(0,1,4,"alpha");
+	//bc_hs.addLinkage(lk_hs0);
+	//Monosaccharide ms_hs1 = mut.getMonosaccharideBySymbol("GlcA");
+	//bc_hs.addUnit(ms_hs1);
+	//Linkage lk_hs1(1,1,4,"belta");
+	//bc_hs.addLinkage(lk_hs1);
+	//Monosaccharide ms_hs2 = mut.getMonosaccharideBySymbol("GlcN");
+	//bc_hs.addUnit(ms_hs2);
+	//Linkage lk_hs2(2,1,4,"alpha");
+	//bc_hs.addLinkage(lk_hs2);
+	//Monosaccharide ms_hs3 = mut.getMonosaccharideBySymbol("GlcA");
+	//bc_hs.addUnit(ms_hs3);
+	//Linkage lk_hs3(3,1,4,"belta");
+	//bc_hs.addLinkage(lk_hs3);
+	//Monosaccharide ms_hs4 = mut.getMonosaccharideBySymbol("GlcN");
+	//bc_hs.addUnit(ms_hs4);
+	//// Add modification.
+	//bc_hs.addModification(0,2,"NH2","H2SO4","H2O");
+	//bc_hs.addModification(0,6,"OH","H2SO4","H2O");
+	//bc_hs.addModification(2,2,"NH2","H2SO4","H2O");
+	//bc_hs.addModification(2,3,"OH","H2SO4","H2O");
+	//bc_hs.addModification(2,6,"OH","H2SO4","H2O");
+	//bc_hs.addModification(3,2,"OH","H2SO4","H2O");
+	//bc_hs.addModification(4,2,"NH2","H2SO4","H2O");
+	//bc_hs.addModification(4,6,"OH","H2SO4","H2O");
+	//bc_hs.addModification(4,1,"OH","CH3OH","H2O");
 
-	GlycanSequence gag;
-	gag.addBranch(bc_hs);
-	cout << "Get GAG composition: " << gag.getCompositionString() << endl;
-	cout << "Get GAG mass: " << gag.getMass() << endl;
+	//GlycanSequence gag;
+	//gag.addBranch(bc_hs);
+	// Read peak list file.
+	std::vector<GlycanSequence> gag_list;
+	readSequence(gag_list);
+	for(std::vector<GlycanSequence>::iterator iter = gag_list.begin(); iter != gag_list.end(); iter++) {
+		cout << "Get GAG composition: " << iter->getCompositionString() << endl;
+		cout << "Get GAG mass: " << iter->getMass() << endl;
 
-	//Fragment frag_hs(gag);
-	Cleavages(gag);	
-	//// Generate all X/A cleavages.
-	//for(size_t k = 0; k <=4; k++) {
-	//	cout << "Mono ID: " << k << endl;
-	//	for(size_t i = 0; i <= 3; i++)
-	//	{
-	//		for(size_t j = i+2; j<=5; j++)
-	//		{
-	//			FragmentPosition fp_hs = {0,k,i,j};
-	//			printFragment(frag_hs, "X", fp_hs);
-	//			printFragment(frag_hs, "A", fp_hs);
-	//		}
+		//Fragment frag_hs(gag);
+		Cleavages(*iter);	
+	}
 
-	//	}
-	//}
-
-	//// Generate all BCYZ cleavage.
-	//for(size_t i = 0; i < 5; i++)
-	//{
-	//	cout << "Mono ID: " << i << endl;
-	//	FragmentPosition fp_hs_g = {0,i,0,0};
-
-	//	printFragment(frag_hs, "B", fp_hs_g);
-	//	printFragment(frag_hs, "Y", fp_hs_g);
-	//	printFragment(frag_hs, "C", fp_hs_g);
-	//	printFragment(frag_hs, "Z", fp_hs_g);
-	//}
-	
-	//for(size_t k = 0; k < 5; k++)
-	//{
-	//	// Add A/B/C cleavage.
-	//	for(re_cleavage re_cl = RE_INTACT; re_cl < RE_N; re_cl++)
-	//	{
-	//		if(re_cl != RE_INTACT) {
-	//			
-	//			for(size_t i = 0; i <= 3; i++)
-	//			{
-	//				for(size_t j = i+2; j<=5; j++)
-	//				{
-	//					if(re_cl == A) {
-	//						Fragment fg1;
-	//						FragmentPosition fp_hs = {0,k,i,j};
-	//						fg1.setFragmentation("A", fp_hs);
-	//						//printFragment(frag_hs, "A", fp_hs);
-	//					} else {
-	//						Fragment fg2;
-	//						FragmentPosition fp_hs = {0,k,0,0};
-	//						fg2.setFragmentation('A' + re_cl);
-	//					}
-	//						
-	//					for(nre_cleavage nre_cl = NRE_INTACT; nre_cl < NRE_N; nre_cl++)
-	//					{
-	//						// No cleavage.
-	//						if(re_cl == RE_INTACT && nre_cl == NRE_INTACT)
-	//							continue;
-
-	//					}
-	//					
-
-
-
-
-	//				}
-
-	//			}
-	//		}
-	//		
-
-
-	//	}
-		// 
-	//}
-
+	// Match against the library.
 	return EXIT_SUCCESS;
 }

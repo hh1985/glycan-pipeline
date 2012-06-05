@@ -28,14 +28,21 @@ namespace gag
 
 	void FragmentationTable::load(const std::string& filename)
 	{
-		//FragmentationTable& ftable = FragmentationTable::Instance();
-		//ftable.load();
 
 		using boost::property_tree::ptree;
 		ptree pt;
 
 		read_xml(filename, pt);
-
+		BOOST_FOREACH(ptree::value_type &v, pt.get_child("parameters.MassShift"))
+		{
+			std::string value = v.second.get<std::string>("Value");
+			int lowerlimit = v.second.get<int>("LowerLimit");
+			int upperlimit = v.second.get<int>("UpperLimit");
+			//std::pair<int, int>
+			mass_loss.insert(std::make_pair(value, std::make_pair(lowerlimit, upperlimit)));
+			
+			
+		}
 		BOOST_FOREACH(ptree::value_type &v, pt.get_child("parameters.CleavageTypes"))
 		{
 			FragmentationParams fp;
@@ -56,25 +63,10 @@ namespace gag
 				}
 			}
 
-
-			//if(v.first == "Name")
-			//	fp.type = v.second.data();
-			//else if(v.first == "Shift")	{
-			//	fp.cleavage_shift = v.second.get<std::string>("Value");
-			//	std::vector<std::string> shift_vals;
-			//	std::string name;
-			//	BOOST_FOREACH(ptree::value_type &s, v.second.get_child("Dissociation"))
-			//	{
-			//		if(s.first == "Value")
-			//			shift_vals.push_back(s.second.data());
-			//		if(s.first == "Name")
-			//			name = s.second.data();
-			//	}
-			//	fp.dis_shift.insert(std::make_pair(name, shift_vals));
-			//}
 			fragmentation_params.insert(std::make_pair(fp.type, fp));	
 			
 		}
+
 
 		pt.erase("parameters.CleavageTypes");
 
@@ -130,5 +122,21 @@ namespace gag
 		} 
 
 		return compo_shift;
+	}
+
+	MassLossWindow FragmentationTable::getMassLoss() const
+	{
+		std::map<std::string, std::pair<int, int> >::const_iterator const_iter = mass_loss.begin();
+		MassLossWindow mlw;
+
+		for(; const_iter != mass_loss.end(); const_iter++)
+		{
+			MassLoss ml;
+			ml.loss_compo = Composition(const_iter->first);
+			ml.lower = const_iter->second.first;
+			ml.upper = const_iter->second.second;
+			mlw.push_back(ml);
+		}
+		return mlw;
 	}
 }

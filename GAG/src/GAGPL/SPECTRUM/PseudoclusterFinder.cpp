@@ -1,4 +1,4 @@
-#include <GAG/SPECTRUM/PseudoclusterFinder.h>
+#include <GAGPL/SPECTRUM/PseudoclusterFinder.h>
 #include <algorithm>
 #include <math.h>
 #include <iostream>

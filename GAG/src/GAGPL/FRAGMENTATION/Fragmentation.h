@@ -80,6 +80,8 @@ namespace gag
 			{
 				return cleavage_sites;
 			}
+
+			Fragment& operator=(const Fragment&);
 			// A generic function for fragmentation.
 			//void updateFragmentByType(const std::string& type);
 	
