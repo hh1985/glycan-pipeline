@@ -5,7 +5,6 @@
 		<Type>
 			<Name>X</Name>
 			<Shift>
-				<Value>H2</Value>
 				<Dissociation>
 					<Name>CID</Name>
 					<Value></Value>
@@ -36,7 +35,6 @@
 		<Type>
 			<Name>A</Name>
 			<Shift>
-				<Value>H2</Value>
 				<Dissociation>
 					<Name>CID</Name>
 					<Value></Value>
@@ -65,4 +63,16 @@
 			</Shift>
 		</Type>
 	</CleavageTypes>
+	<MassShift>
+		<MassLoss>
+			<Value>SO3</Value>
+			<LowerLimit>0</LowerLimit>
+			<UpperLimit>2</UpperLimit>
+		</MassLoss>
+		<MassLoss>
+			<Value>H</Value>
+			<LowerLimit>-2</LowerLimit>
+			<UpperLimit>2</UpperLimit>
+		</MassLoss>
+	</MassShift>
 	</parameters>

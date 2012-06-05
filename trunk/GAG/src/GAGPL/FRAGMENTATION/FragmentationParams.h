@@ -34,7 +34,7 @@ namespace gag
 			// Dissociation name and corresponding shifts.
 			std::map<std::string, std::vector<std::string> > dis_shift;	
 			// Internal cleavage might be considered as neutral loss, which reduces the number of fragments.
-			std::vector<Composition> neutral_loss; 
+			// std::map<std::string, std::pair<int, int> > mass_loss; 
 	};
 }
 

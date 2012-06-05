@@ -3,7 +3,9 @@ SET(EXTERN_INCLUDE
 	D:/Development/boost/boost_1_49_0 # Boost.
 	E:/Sync/Dropbox/Codes/glycan_pipeline/GAG/src
 	)
-	
+SET(PEAKLIST
+	../src/GAGPL/SPECTRUM/PeakList.h ../src/GAGPL/SPECTRUM/PeakList.cpp
+)	
 SET(CHEMISTRY 
 	../src/GAGPL/CHEMISTRY/Composition.h ../src/GAGPL/CHEMISTRY/Composition.cpp
 	../src/GAGPL/CHEMISTRY/FunctionalGroup.h ../src/GAGPL/CHEMISTRY/FunctionalGroupTable.h ../src/GAGPL/CHEMISTRY/FunctionalGroupTable.cpp
@@ -61,7 +63,7 @@ SET(LIBRARY
 	../src/GAGPL/GAGLIBRARY/LibraryTree.h ../src/GAGPL/GAGLIBRARY/LibraryTree.cpp
 )
 INCLUDE_DIRECTORIES(. ${EXTERN_INCLUDE} ../src/GAGPL/CHEMISTRY)
-
+ADD_EXECUTABLE(peaklist ${PEAKLIST} PeakListTest.cpp)
 ADD_EXECUTABLE(periodictable ${PERIODICTABLE} PeriodicTableTest.cpp)
 ADD_EXECUTABLE(composition ${COMPOSITION} CompositionTest.cpp)
 ADD_EXECUTABLE(functionalgroup ${FUNCTIONALGROUP} FunctionalGroupTest.cpp)

@@ -163,4 +163,14 @@ namespace gag
 		return tmp_compo;
 	}
 
+
+	
+	Fragment& Fragment::operator=(const Fragment& rhs)
+	{
+		if(this != &rhs)
+		{
+			cleavage_sites = rhs.cleavage_sites;
+		}
+		return *this;
+	}
 }

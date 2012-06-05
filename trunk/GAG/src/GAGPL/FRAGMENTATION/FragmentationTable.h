@@ -29,12 +29,21 @@ namespace gag
 {
 	typedef std::pair<int, Composition> CompositionSigned;
 	typedef std::vector<CompositionSigned> CompositionShift;
+	struct MassLoss
+	{
+		Composition loss_compo;
+		int upper;
+		int lower;
+	};
+	typedef std::vector<MassLoss> MassLossWindow;
 
 	class FragmentationTable: public ConfigLoader, private boost::noncopyable
 	{
 		private:
+			// string here is type.
 			std::map<std::string, FragmentationParams> fragmentation_params;
-
+			// string here is the signed composition
+			std::map<std::string, std::pair<int, int> > mass_loss; 
 		protected:
 			FragmentationTable() {}
 
@@ -48,7 +57,7 @@ namespace gag
 			CompositionSigned getCompositionSigned(const std::string& str) const;
 			CompositionShift getCleavageShift(const std::string& cleavage_type) const;
 			CompositionShift getCleavageShift(const std::string& cleavage_type, const std::string& dis_type) const;			 
-
+			MassLossWindow getMassLoss() const;
 	};
 }
 
