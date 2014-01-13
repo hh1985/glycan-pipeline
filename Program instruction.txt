@@ -1,0 +1,34 @@
+Hex6: pre 510.01074	charge -3
+Hex6: pre 382.25640 charge -4
+Hex6: pre 305.60354 charge -5
+Hex6: pre 254.50175 charge -6
+
+Hex7: pre 536.66297 charge -3
+Hex7: pre 402.24564 charge -4
+Hex7: pre 321.59491 charge -5
+Hex7: pre 267.82790 charge -6
+
+p71: pre 521.06975 charge 3-
+p71: pre 390.55076 charge 4-
+
+p82: pre 393.48524 charge 6-
+
+boons03: pre 391.35460 charge 3-
+boons03: pre 293.26412 charge 4-
+
+boons23: pre 547.55710 charge 2-
+boons23: pre 364.70230 charge 3-
+boons23: pre 273.27492 charge 4-
+
+boons38: pre 391.35453 charge 3-
+boons38: pre 293.26412 charge 4-
+
+dp15: pre 600.50781 charge -5
+dp15: pre 500.42310 charge -6
+dp15: pre 428.79002 charge -7
+dp15: pre 375.06593 charge -8
+
+Arixtra: pre 375.72961 charge -4
+Arixtra: pre 300.38230 charge -5
+
+Arixtra: pre 250.15072 charge -6
