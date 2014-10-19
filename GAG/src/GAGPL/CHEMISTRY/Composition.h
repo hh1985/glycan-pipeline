@@ -18,8 +18,8 @@
 #ifndef  GAG_COMPOSITION_H_INC
 #define  GAG_COMPOSITION_H_INC
 
-#include <GAGPL/CHEMISTRY/Element.h>
-#include <GAGPL/CHEMISTRY/PeriodicTable.h>
+#include "GAGPL/CHEMISTRY/Element.h"
+#include "GAGPL/CHEMISTRY/PeriodicTable.h"
 
 namespace gag
 {
@@ -42,7 +42,7 @@ namespace gag
 			// std::string _compo_string;
 		
 		protected:
-			void addElement(const std::string&, const int&);
+			
 
 		public:
 			// Constructor. 
@@ -51,29 +51,27 @@ namespace gag
 			
 			// Update _composition and _mass
 			void update(const std::string&);
-			// Udpate _mass
-			//void updateMass();
+			// update _mass
+			// void updateMass();
 
 			//void updateString();
 			// get _mass
-     	double getMass() const;
-			//{
-			//	return _mass;
-			//}
+     		double getMass() const;
+
+			double getAverageMass() const;
 
 			// From map structure to string.
 			std::string getCompositionString() const;
-			//{
-			//	return _compo_string;
-			//}
+
+			void addElement(const std::string&, const int&);
+
+			size_t getMaxNumVariants() const;
 
 			// get _composition.
 			inline const std::map<std::string, int>& get() const
 			{
 				return _composition;
 			}
-			
-
 
 			void add(const Composition&);
 			void add(const std::string&);
@@ -93,6 +91,25 @@ namespace gag
 				return left.getCompositionString()==right.getCompositionString();
 			}
 
+			bool operator<(const Composition& compo)
+			{
+				if(_composition.empty())
+					return true;
+				std::map<std::string, int>::const_iterator const_iter = _composition.begin();
+				for(; const_iter != _composition.end(); const_iter++)
+				{
+					std::map<std::string, int>::const_iterator it = compo.get().find(const_iter->first);
+					if(it != compo.get().end()){
+						if(const_iter->second > it->second){
+							return false;
+						}
+					} else {
+						return false;
+					}
+				}
+				return true;
+			}
+		
 	};
 }
 

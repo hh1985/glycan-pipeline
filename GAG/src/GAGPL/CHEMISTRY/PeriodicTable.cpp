@@ -16,7 +16,7 @@
  * =====================================================================================
  */
 
-#include <GAGPL/CHEMISTRY/PeriodicTable.h>
+#include "GAGPL/CHEMISTRY/PeriodicTable.h"
 #include <iostream>
 
 namespace gag
@@ -30,6 +30,7 @@ namespace gag
 
 	void PeriodicTable::load(const std::string& filename)
 	{
+		std::cout << "Load periodic table !" << std::endl;
 		using boost::property_tree::ptree;
 		ptree pt;
 		
@@ -52,10 +53,11 @@ namespace gag
 				std::pair<ptree::assoc_iterator, ptree::assoc_iterator> ei = v.second.equal_range("Isotope");
 				for(ptree::assoc_iterator iter = ei.first; iter != ei.second; iter++)
 				{
-					//std::cout << "After Isotope" << std::endl;
-					//std::cout << iter->first << std::endl;
-					//std::cout << iter->second.get<double>("Mass") << " " << iter->second.get<float>("Probability") << std::endl;
-					Isotope iso = {iter->second.get<double>("Mass"), iter->second.get<float>("Probability")};
+					// Notice that this round method only works for positive number.
+					size_t nominal_mass = int(iter->second.get<double>("Mass") + 0.5);
+					
+					Isotope iso = {iter->second.get<double>("Mass"), iter->second.get<float>("Probability"), iter->second.get<size_t>("Shift"), nominal_mass};
+
 					//std::cout << iso.mass << " " << iso.abundance << std::endl;
 					elem.isotopes.push_back(iso);					
 				}
@@ -73,6 +75,34 @@ namespace gag
 	{
 		std::map<std::string, Element>::const_iterator i = elements.find(symbol);
 		return i != elements.end() ? i->second : Element();
+	}
+
+	const Isotope PeriodicTable::getIsotopeByRelativeShift( const std::string& symbol, const size_t shift/*=0*/ ) const
+	{
+		const Element ele = this->getElementBySymbol(symbol);
+		// Nominal shift.
+		const IsotopeSet::nth_index<1>::type& isotope_index = ele.isotopes.get<1>();
+		IsotopeSet::nth_index<1>::type::const_iterator shift_iter = isotope_index.find(shift);
+		return shift_iter != isotope_index.end() ? *shift_iter : Isotope();
+	}
+
+	const Isotope PeriodicTable::getIsotopeByNominalMass( const std::string& symbol, const size_t mass ) const
+	{
+		const Element ele = this->getElementBySymbol(symbol);
+		// Nominal shift.
+		const IsotopeSet::nth_index<2>::type& isotope_index = ele.isotopes.get<2>();
+		IsotopeSet::nth_index<2>::type::const_iterator shift_iter = isotope_index.find(mass);
+		return shift_iter != isotope_index.end() ? *shift_iter : Isotope();
+
+	}
+
+	size_t PeriodicTable::getMaxRelativeShift( const std::string& symbol ) const
+	{
+		const Element ele = this->getElementBySymbol(symbol);
+
+		IsotopeSetSequential::reverse_iterator it = ele.isotopes.rbegin();
+
+		return it->neutron_shift;
 	}
 
 }

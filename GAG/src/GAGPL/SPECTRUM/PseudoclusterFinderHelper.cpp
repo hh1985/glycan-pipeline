@@ -1,4 +1,4 @@
-#include <GAG/SPECTRUM/PseudoclusterFinderHelper.h>
+#include <GAGPL/SPECTRUM/PseudoclusterFinderHelper.h>
 
 namespace gag
 {

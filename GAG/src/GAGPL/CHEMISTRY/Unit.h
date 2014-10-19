@@ -53,8 +53,8 @@ namespace gag
 			{
 				return compo;
 			}
-			
-			inline std::string getCompositionString()
+
+			inline std::string getCompositionString() const
 			{
 				return compo.getCompositionString();
 			}

@@ -24,7 +24,7 @@ int main ( int argc, char *argv[] )
 	using namespace gag;
 	// The Periodic Table should be loaded at least once;
 	PeriodicTable& pt = PeriodicTable::Instance();
-	pt.load();
+	//pt.load();
 
 	/* Set composition. */
 	Composition cp("C7H20OHCl3");
@@ -81,6 +81,18 @@ int main ( int argc, char *argv[] )
 	cp.clear();
 	std::cout << "After clear, size is: " << cp.getCompositionString().length() << std::endl;
 
+	std::cout << "**************************************" << std::endl;
+	std::cout << "         Test 2: Comparison            " << std::endl;
+	std::cout << "**************************************" << std::endl;
+
+	Composition comp0("C3HO3");
+	Composition comp1("H2O");
+	std::cout << "Compare" << comp0.getCompositionString() << " and " << comp1.getCompositionString() << std::endl;
+	std::cout << "Results: ";
+	if(comp1 < comp0)
+		std::cout << "smaller" << std::endl;
+	else
+		std::cout << "larger" << std::endl;
 
 
 	return EXIT_SUCCESS;

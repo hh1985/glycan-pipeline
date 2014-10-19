@@ -43,13 +43,18 @@ namespace gag
 		InternalSite(std::string str)
 			: Unit(str)
 		{}
-
+		// No modification of the composition.
 		inline void addFunctionalGroup(const FunctionalGroup& fg)
 		{
 			// TBD: Exception of repeating keys.
-			//_groups.insert(std::make_pair(fg, num));
 			_groups.insert(fg);
 		}
+		inline void removeFunctionalGroup(const FunctionalGroup& fg)
+		{
+			_groups.erase(fg);
+		}
+
+		void addFunctionalGroup(const std::string& str);
 
 		// Specify the original fg, the fg that will add to it, and the lost composition of all.
 		// High level.
@@ -62,11 +67,24 @@ namespace gag
 		// If there is repeating fgs.
 		//void remove(FunctionalGroup& ori, const Composition& compo);
 		//void remove(FunctionalGroup& ori);
+		void replace(FunctionalGroup& ori, FunctionalGroup& replace);
+
+		// Get the tracked functional group and take it as the core for addition.
+		void addFunctionalGroup(std::vector<FunctionalGroup>& fg_chain, FunctionalGroup& fg);
+		void removeFunctionalGroup(std::vector<FunctionalGroup>& fg_chain);
+
+		// This function is used to specify the atom shift for B/Y cleavage.
+		Composition getCleavageShift(FunctionalGroup& fg, const size_t idx);
+		// Simply get the first non-H functional group.
+		Composition getCleavageShift(const size_t idx);
 
 		inline std::multiset<FunctionalGroup>& getFunctionalGroups()
 		{
 			return _groups;
 		}
+
+		bool hasFunctionalGroup(FunctionalGroup& fg);
+		bool hasFunctionalGroup(const std::string& str);
 		
 	};
 }

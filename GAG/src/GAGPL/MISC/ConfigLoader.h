@@ -22,15 +22,14 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-//#include <boost/property_tree/typeof.hpp>
 #include <boost/foreach.hpp>
-//#include <tinyxml2.h>
 
 namespace gag
 {
 	class ConfigLoader 
 	{
 		public:
+			// Abstract interface: loading XML parameter file.
 			virtual void load(const std::string& filename) = 0;
 			
 			virtual ~ConfigLoader() {}

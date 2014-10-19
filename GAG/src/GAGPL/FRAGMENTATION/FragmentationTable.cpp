@@ -58,6 +58,7 @@ namespace gag
 					for(ptree::assoc_iterator iter = ret2.first; iter != ret2.second; iter++)
 					{
 						shift_vals.push_back(iter->second.data());
+            fp.cleavage_shift.push_back(iter->second.data());
 					}
 					fp.dis_shift.insert(std::make_pair(name, shift_vals));
 				}

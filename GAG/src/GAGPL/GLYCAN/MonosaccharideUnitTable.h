@@ -36,7 +36,9 @@ namespace gag
 
 		protected:
 
-			MonosaccharideUnitTable() {}
+			MonosaccharideUnitTable() {
+				load();
+			}
 
 		public:
 
