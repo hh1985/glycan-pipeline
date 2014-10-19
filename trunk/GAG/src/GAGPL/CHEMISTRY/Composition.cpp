@@ -8,72 +8,30 @@
  *        Version:  1.0
  *        Created:  4/23/2012 10:12:49 PM
  *       Revision:  none
- *       Compiler:  gcc
+ *       Compiler:  msvc
  *
  *         Author:  HAN HU, hh1985@bu.edu
  *   Organization:  Bioinformatics Program, Boston University
  *
  * =====================================================================================
  */
-#include <GAGPL/CHEMISTRY/Composition.h>
+#include "GAGPL/CHEMISTRY/Composition.h"
 #include <boost/lexical_cast.hpp>
 #include <stdexcept>
 #include <locale>
 
-//#include <boost/algorithm/string.hpp>
-
 namespace  gag
 {
-  // Calculate the mass of given composition.
-	//void Composition::updateString()
-	//{
-	//	// clean the string.
-	//	_compo_string.clear();
-
-	//	// Generate the string.
-	//	for(std::map<std::string, int>::iterator iter = _composition.begin();
-	//			iter != _composition.end(); iter++)
-	//	{
-	//		if(iter->second == 1)
-	//			_compo_string.append(iter->first);
-	//		else if(iter->second > 1)
-	//		{
-	//			_compo_string.append(iter->first);
-	//			_compo_string.append(boost::lexical_cast<std::string>(iter->second));
-	//		} else {
-	//			throw 32751;
-	//		}
-	//	}
-	//}
-	//
-	//void Composition::updateMass()
-	//{
-	//	_mass = 0.0;
-
-	//	std::map<std::string, int>::iterator iter1 = _composition.begin();
-
- //   for(; iter1 != _composition.end(); iter1++)
- //   {
- //     
-	//		Element e = _ptable.getElementBySymbol(iter1->first);
-
-	//		std::vector<Isotope>::iterator iter2 = e.isotopes.begin();
-
-	//		//std::cout << (*iter1).second << ": " << (*iter2).mass << std::endl;
- //     _mass = _mass + (*iter1).second * (*iter2).mass;
- //   }
-	//}
-
 	double Composition::getMass() const
 	{
 		std::map<std::string, int>::const_iterator iter1 = _composition.begin();
 		double mass = 0.0;
 		for(; iter1 != _composition.end(); iter1++)
 		{
-			Element e = _ptable.getElementBySymbol(iter1->first);
+			const Isotope& iso = _ptable.getIsotopeByRelativeShift(iter1->first);
 			// TBD: support for multiple isotopes.
-			std::vector<Isotope>::iterator iter2 = e.isotopes.begin();
-			mass += (*iter1).second * (*iter2).mass;
+			// std::vector<Isotope>::iterator iter2 = e.isotopes.begin();
+			mass += (*iter1).second * iso.mass;
 		}
 		return mass;
 	}
@@ -251,12 +209,14 @@ namespace  gag
 		: _ptable(PeriodicTable::Instance()), _composition()/*, _mass(0.0), _compo_string() */
 	{
 		// Update _composition and _mass
+		//_ptable.load();
 		(*this).update(str);
 	}
 
 	Composition::Composition()
 		: _ptable(PeriodicTable::Instance()), _composition()/*, _mass(0.0), _compo_string()*/
 	{
+		//_ptable.load();
 	}
 
 	Composition& Composition::operator=(const Composition& rhs)
@@ -270,5 +230,31 @@ namespace  gag
 		return *this;
 	}
 
+	size_t Composition::getMaxNumVariants() const
+	{
+		std::map<std::string, int>::const_iterator it = _composition.begin();
+
+		size_t max_num = 0;
+
+		for(; it!=_composition.end(); it++)
+		{
+			max_num += it->second * _ptable.getMaxRelativeShift(it->first);
+		}
+
+		return max_num;
+	}
+
+	double Composition::getAverageMass() const
+	{
+		double avg_mass(0.0);
+		std::map<std::string, int>::const_iterator it = _composition.begin();
+
+		for(; it!=_composition.end(); it++)
+		{
+			avg_mass += _ptable.getElementBySymbol(it->first).getAverageMass() * it->second;
+		}
+
+		return avg_mass;
+	}
 }
 

@@ -34,6 +34,12 @@ namespace gag
 		Composition loss_compo;
 		int upper;
 		int lower;
+
+		MassLoss(const Composition& compo, int u, int l)
+			: loss_compo(compo), upper(u), lower(l)
+		{
+		}
+		MassLoss() {}
 	};
 	typedef std::vector<MassLoss> MassLossWindow;
 
@@ -45,13 +51,15 @@ namespace gag
 			// string here is the signed composition
 			std::map<std::string, std::pair<int, int> > mass_loss; 
 		protected:
-			FragmentationTable() {}
+			FragmentationTable() {
+				load();
+			}
 
 		public:
 			
 			static FragmentationTable& Instance();
 
-			void load(const std::string& filename = "../config/fragmentation.xml");
+			void load(const std::string& filename = "./config/fragmentation.xml");
 
 			FragmentationParams getFragmentationParams(const std::string& cleavage_type) const;
 			CompositionSigned getCompositionSigned(const std::string& str) const;

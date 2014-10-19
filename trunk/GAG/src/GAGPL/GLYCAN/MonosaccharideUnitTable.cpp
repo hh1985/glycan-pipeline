@@ -19,6 +19,7 @@
 
 #include <GAGPL/GLYCAN/MonosaccharideUnitTable.h>
 #include <GAGPL/CHEMISTRY/FunctionalGroupTable.h>
+#include <iostream>
 
 namespace gag
 {
@@ -30,6 +31,7 @@ namespace gag
 
 	void MonosaccharideUnitTable::load(const std::string& filename)
 	{
+		std::cout << "Load monosaccharide unit table once!" << std::endl;
 		using boost::property_tree::ptree;
 		ptree pt;
 
@@ -49,7 +51,7 @@ namespace gag
 				{
 					std::string& compo = s.second.get<std::string>("Composition");
 					
-					InternalSite is(compo);
+					Site is(compo);
 
 					if(s.second.count("Subset")>0) {
 						BOOST_FOREACH(ptree::value_type &m, s.second.get_child("Subset"))

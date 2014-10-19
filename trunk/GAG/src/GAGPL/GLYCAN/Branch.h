@@ -9,18 +9,13 @@ namespace gag
 {
 	class Branch : public Unit
 	{
-		// using boost::any_cast;
-		// The connecting branch ids and the linkage.
-		// typedef std::map<size_t, Linkage> LinkEnv; 
-
 		private:
 			size_t branch_id;
 			
 			std::vector<Monosaccharide> mono_chain;
+			std::vector<Composition> re_extension;
 
 			// For glycan, there will be only one reducing end.
-			//LinkEnv nre_branch_ids;
-			//LinkEnv re_branch_ids; 
 			
 			// The mono_id and the linkage.
 			std::vector<Linkage> links;
@@ -35,6 +30,8 @@ namespace gag
 			
 			void addLinkage(const Linkage& link);
 
+			void addExtension(Composition& compo);
+
 			std::vector<Linkage> getNeighborLinks(const size_t mono_id);
 
 			inline size_t getBranchID() const
@@ -46,11 +43,25 @@ namespace gag
 			{
 				return mono_chain;
 			}
+			inline const std::vector<Monosaccharide>& getGlycanChainUnits() const
+			{
+				return mono_chain;
+			}
 
+			inline size_t getUnitNum()
+			{
+				return mono_chain.size();
+			}
 			inline std::vector<Linkage>& getLinkages()
 			{
 				return links;
 			}
+			inline size_t getExtensionNum()
+			{
+				return re_extension.size();
+			}
+
+			Composition getExtensionComposition();
 
 			inline Monosaccharide& getUnitByID(const size_t id)
 			{
@@ -62,12 +73,8 @@ namespace gag
 
 			// Useful for calculating fragment mass.
 			Composition getSubComposition(const size_t start, const size_t end);
-			
-			void addModification(const size_t mono_id, const size_t site_id, FunctionalGroup& ori, const Composition& plus, const Composition& minus);
-			void addModification(const size_t mono_id, const size_t site_id, const std::string& ori, const std::string& plus, const std::string& minus);
-
-			void removeModification(const size_t mono_id, const size_t site_id, FunctionalGroup& ori, const Composition& minus);
-			void removeModification(const size_t mono_id, const size_t site_id, const std::string& ori, const std::string& minus);
+		
+			void printStructure();
 	};
 }
 

@@ -22,8 +22,6 @@
 #include <map>
 #include <vector>
 #include <string>
-//#include <utility>
-//#include <boost/any.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/noncopyable.hpp>
 
@@ -34,8 +32,7 @@ namespace gag
 	enum Flag {UNUSED, USED};
 	enum Order {ACE, DEC};
 	
-	// This is my customized type of peaks, which includes the status information of 
-	// a given peak.
+	// This is my customized type of peaks, which includes the status information of a given peak.
 	class Peak{
 		public:
 			Peak() 
@@ -88,7 +85,6 @@ namespace gag
 	};
 	
 	typedef std::vector<Peak> PeakList;
-	
 	
 	// Singleton design pattern. Needs to understand it later.
 	class Param: boost::noncopyable {

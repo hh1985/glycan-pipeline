@@ -15,7 +15,7 @@
  *
  * =====================================================================================
  */
-
+#include <iostream>
 #include <GAGPL/GLYCAN/Branch.h>
 #include <GAGPL/CHEMISTRY/FunctionalGroupTable.h>
 
@@ -32,8 +32,9 @@ namespace gag
 			//Composition& cp = is.getFunctionalGroups().at(0).getComposition();
 			FunctionalGroupTable& fgt = FunctionalGroupTable::Instance();
 			//:) TBD The functional group should be specified by name.
-			FunctionalGroup& fg = fgt.getFunctionalGroupBySymbol("OH");
-			mono_unit.remove(lk.end, fg);
+			//FunctionalGroup& fg = fgt.getFunctionalGroupBySymbol("OH");
+			//mono_unit.removeFunctionalGroup(lk.end, fg);
+			mono_unit.removeFunctionalGroup("OH", lk.end);
 		}
 		mono_chain.push_back(mono_unit);
 		compo.add(mono_unit.getComposition());
@@ -50,15 +51,27 @@ namespace gag
 		//InternalSite& is = mono.getInternalSites().at(link.start); 
 		FunctionalGroupTable& fgt = FunctionalGroupTable::Instance();
 		//:) TBD The functional group should be specified by name.
-		FunctionalGroup& fg = fgt.getFunctionalGroupBySymbol("H");
-		mono.remove(link.start, fg);
+		FunctionalGroup& fg_h = fgt.getFunctionalGroupBySymbol("H");
+		FunctionalGroup& fg_oh = fgt.getFunctionalGroupBySymbol("OH");
+		FunctionalGroupChain chain;
+
+		chain.push_back(std::make_pair(link.start, fg_oh));
+		chain.push_back(std::make_pair(0, fg_h));
+
+		mono.removeFunctionalGroupByChain(chain);
 		// Retrieve the composition on specified position.
 		//Composition& cp = is.getFunctionalGroups().at(0).site_gps.at(1);
 		//FunctionalGroup fg("OH");
 		//is.remove(fg, "H");
 
 		links.push_back(link);
-		compo.deduct(fg.getComposition());
+		compo.deduct("H");
+	}
+
+	void Branch::addExtension(Composition& cp)
+	{
+		re_extension.push_back(cp);
+		compo.add(cp);
 	}
 
 	std::vector<Linkage> Branch::getNeighborLinks(const size_t mono_id)
@@ -101,37 +114,76 @@ namespace gag
 		{
 			compo.add(iter->getComposition());
 		}
+		for(std::vector<Composition>::iterator iter = re_extension.begin(); 
+			iter != re_extension.end(); iter++)
+		{
+			compo.add(*iter);
+		}
 
 	}
+	//void Branch::addModification(const size_t mono_id, const size_t site_id, const std::string& plus)
+	//{
+	//	Monosaccharide& mono = mono_chain.at(mono_id);
+	//	mono.addComposition(site_id, plus);
+	//	compo.add(plus);
+	//}
+	//void Branch::addModification(const size_t mono_id, const size_t site_id, FunctionalGroup& ori, const Composition& plus, const Composition& minus)
+	//{
+	//	Monosaccharide& mono = mono_chain.at(mono_id);
+	//	mono.addFunctionalGroup(site_id, ori, plus, minus);
+	//	compo.add(plus);
+	//	compo.deduct(minus);
+	//}
 
-	void Branch::addModification(const size_t mono_id, const size_t site_id, FunctionalGroup& ori, const Composition& plus, const Composition& minus)
+	//void Branch::addModification(const size_t mono_id, const size_t site_id, const std::string& ori, const std::string& plus, const std::string& minus)
+	//{
+	//	Monosaccharide& mono = mono_chain.at(mono_id);
+	//	mono.addFunctionalGroup(site_id, ori, plus, minus);
+	//	compo.add(plus);
+	//	compo.deduct(minus);
+	//}
+
+	//void Branch::replace(const size_t mono_id, const size_t site_id, FunctionalGroup& ori, FunctionalGroup& re)
+	//{
+	//	Monosaccharide& mono = mono_chain.at(mono_id);
+	//	mono.replace(site_id, ori, re);
+	//	compo.deduct(ori.getComposition());
+	//	compo.add(re.getComposition());
+	//}
+
+	//void Branch::removeModification(const size_t mono_id, const size_t site_id, FunctionalGroup& ori, const Composition& minus)
+	//{
+	//	Monosaccharide& mono = mono_chain.at(mono_id);
+	//	mono.removeFunctionalGroup(site_id, ori, minus);
+	//	compo.deduct(minus);
+	//}
+	//void Branch::removeModification(const size_t mono_id, const size_t site_id, const std::string& ori, const std::string& minus)
+	//{
+	//	Monosaccharide& mono = mono_chain.at(mono_id);
+	//	mono.removeFunctionalGroup(site_id, ori, minus);
+	//	compo.deduct(minus);
+	//}
+	Composition Branch::getExtensionComposition()
 	{
-		Monosaccharide& mono = mono_chain.at(mono_id);
-		mono.add(site_id, ori, plus, minus);
-		compo.add(plus);
-		compo.deduct(minus);
+		Composition temp_compo;
+		for(size_t i=0; i < re_extension.size(); i++)
+			temp_compo.add(re_extension.at(i));
+
+		return temp_compo;
 	}
 
-	void Branch::addModification(const size_t mono_id, const size_t site_id, const std::string& ori, const std::string& plus, const std::string& minus)
+	void Branch::printStructure()
 	{
-		Monosaccharide& mono = mono_chain.at(mono_id);
-		mono.add(site_id, ori, plus, minus);
-		compo.add(plus);
-		compo.deduct(minus);
+		std::cout << "Branch: " << this->getBranchID()  << std::endl;
+		std::cout << "Composition: " << this->getCompositionString()<< std::endl;
+		std::vector<Monosaccharide>& mono_chain = this->getGlycanChainUnits();
+
+		for(std::vector<Monosaccharide>::iterator iter = mono_chain.begin(); iter != mono_chain.end(); iter++)
+		{
+			iter->printStructure();
+		}
 	}
 
-	void Branch::removeModification(const size_t mono_id, const size_t site_id, FunctionalGroup& ori, const Composition& minus)
-	{
-		Monosaccharide& mono = mono_chain.at(mono_id);
-		mono.remove(site_id, ori, minus);
-		compo.deduct(minus);
-	}
-	void Branch::removeModification(const size_t mono_id, const size_t site_id, const std::string& ori, const std::string& minus)
-	{
-		Monosaccharide& mono = mono_chain.at(mono_id);
-		mono.remove(site_id, ori, minus);
-		compo.deduct(minus);
-	}
 }
 
 

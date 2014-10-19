@@ -21,6 +21,7 @@
 #define  GAG_LINKAGE_INC
 
 #include <string>
+#include <GAGPL/CHEMISTRY/FunctionalGroup.h>
 
 namespace gag
 {

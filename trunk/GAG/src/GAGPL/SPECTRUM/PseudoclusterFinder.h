@@ -24,7 +24,7 @@
 #ifndef GAG_PSEUDOCLUSTERFINDER_H
 #define GAG_PSEUDOCLUSTERFINDER_H
 
-#include <GAG/SPECTRUM/PseudoclusterFinderHelper.h>
+#include <GAGPL/SPECTRUM/PseudoclusterFinderHelper.h>
 
 namespace gag
 {	
@@ -40,7 +40,7 @@ namespace gag
 	
 	class IsotopePeak: public Peak
 	{
-		// The location information includes cluster id and shift from highest peak.
+		// The location information includes cluster id and shift from highest peak.  The shift can be either left or right, and the value can therefore be negative or positive.
 		typedef std::map<size_t, int> PeakLocation;
 		private:
 			// The ID of the isotope cluster.
@@ -73,7 +73,7 @@ namespace gag
 				// Erase by key.
 				peakinfo.erase(cid);
 			}
-	
+			// Decide if a peak is included in a cluster.	
 			bool includeCluster(const PseudoclusterList& clusterlist);
 			
 			inline void changeFlag()
@@ -183,8 +183,6 @@ namespace gag
 	};
 	
 	// Personally there will be a PseudoclusterList for each charge.
-
-	
 	class PseudoclusterFinder {
 		private:
 			Param& _param;

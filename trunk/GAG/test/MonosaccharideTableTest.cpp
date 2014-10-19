@@ -19,6 +19,8 @@
 #include <GAGPL/GLYCAN/MonosaccharideUnitTable.h>
 #include <GAGPL/CHEMISTRY/FunctionalGroupTable.h>
 #include <GAGPL/GLYCAN/InternalSite.h>
+#include <iostream>
+
 //#include <GAGPL/CHEMISTRY/PeriodicTable.h>
 using namespace std;
 using namespace gag;
@@ -97,6 +99,15 @@ int main ( int argc, char *argv[] )
 	mono.remove(test_pos, fg1, cp31);
 	exploreInternalSite(site2);
 
-
+	cout << "Cleavage shift: ";
+	Composition temp_compo = mono.getCleavageShift();
+	cout << temp_compo.getCompositionString() << endl;
+	FunctionalGroup& fg_nh = fgt.getFunctionalGroupBySymbol("2-AB");
+	FunctionalGroup& fg_oh = fgt.getFunctionalGroupBySymbol("OH");
+	mono.replace(2,fg_oh,fg_nh);
+	
+	cout << "After replace: ";
+	cout << mono.getCleavageShift().getCompositionString() << endl;
+	
 	return EXIT_SUCCESS;
 }				/* ----------  end of function main  ---------- */
