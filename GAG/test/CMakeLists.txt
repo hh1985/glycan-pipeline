@@ -103,11 +103,6 @@ SET(LIBRARY
 	../src/GAGPL/MATH/MassConversion.h ../src/GAGPL/MATH/MassConversion.cpp
 	../src/GAGPL/GAGLIBRARY/LibraryTree.h ../src/GAGPL/GAGLIBRARY/LibraryTree.cpp
 )
-# SET(LIBRARYMATCHING
-	# ${LIBRARY}
-	# ../src/GAGPL/SPECTRUM/InternalCalibration.h ../src/GAGPL/SPECTRUM/InternalCalibration.cpp
-	# ../src/GAGPL/GAGLIBRARY/LibraryMatching.h ../src/GAGPL/GAGLIBRARY/LibraryMatching.cpp
-# )
 # SET(FOREST
 	# ${LIBRARY}
 	# ../src/GAGPL/GAGLIBRARY/LibraryForest.h ../src/GAGPL/GAGLIBRARY/LibraryForest.cpp
