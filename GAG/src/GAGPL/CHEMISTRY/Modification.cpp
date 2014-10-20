@@ -30,8 +30,8 @@ namespace gag
 	std::string ModificationPosition::printString() const
 	{
 		std::string mod_string;
-		mod_string.append(boost::lexical_cast<std::string>(macro_pos.branch_id));
-		mod_string.append("-");
+		//mod_string.append(boost::lexical_cast<std::string>(macro_pos.branch_id));
+		//mod_string.append("-");
 		mod_string.append(boost::lexical_cast<std::string>(macro_pos.mono_id));
 		mod_string.append("-");
 		mod_string.append(boost::lexical_cast<std::string>(site_id));

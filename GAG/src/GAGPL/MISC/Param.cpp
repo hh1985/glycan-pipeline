@@ -20,7 +20,7 @@ namespace param
 
 	void Param::load( const std::string& filename )
 	{
-		std::cout << "Load it once!" << std::endl;
+		std::cout << "Load parameter file!" << std::endl;
 
 		using boost::property_tree::ptree;
 		ptree pt;

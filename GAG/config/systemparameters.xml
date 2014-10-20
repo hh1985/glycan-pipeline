@@ -36,7 +36,7 @@
 		</Parameter>
 		<Parameter>
 			<Name>external_accuracy</Name>
-			<Value>15</Value>
+			<Value>5</Value>
 		</Parameter>
 		<Parameter>
 			<Name>minimal_num_peaks</Name>
