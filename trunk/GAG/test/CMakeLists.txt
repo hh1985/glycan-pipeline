@@ -1,8 +1,10 @@
 ## DIRECTORY: /GAG/test
 SET(EXTERN_INCLUDE
-	D:/Development/boost/ # Boost.
-	D:/Development/alglib/3.7.0/src # ALGLIB
+	../../extra_lib/boost/ # Boost.
+	../../extra_lib/alglib/src # ALGLIB
 )
+LINK_DIRECTORIES(../../extra_lib/boost/stage/lib)
+
 SET(PARAM
 	../src/GAGPL/MISC/ConfigLoader.h
 	../src/GAGPL/MISC/Param.h ../src/GAGPL/MISC/Param.cpp
@@ -129,7 +131,7 @@ SET(SEQUENCESPACE
 )
 
 INCLUDE_DIRECTORIES(${EXTERN_INCLUDE} ../src)
-LINK_DIRECTORIES(D:/Development/boost/stage/lib)
+
 
 ADD_EXECUTABLE(param ${PARAM} ParamTest.cpp)
 ADD_EXECUTABLE(vietesformulae ${VTFORMULAE} VietesFormulaeTest.cpp)
