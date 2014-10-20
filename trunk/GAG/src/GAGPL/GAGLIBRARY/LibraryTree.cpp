@@ -721,7 +721,7 @@ namespace gag
 			}
 			outfile.close();
 		} else {
-			std::cout << "Unable to open file!\n" << std::endl;
+			throw std::runtime_error("Unable to open file " + filename);
 		}
 	}
 

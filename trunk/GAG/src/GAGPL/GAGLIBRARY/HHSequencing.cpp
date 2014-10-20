@@ -13,111 +13,112 @@
 #include <GAGPL/GAGLIBRARY/SequencePrediction.h>
 #include <GAGPL/IO/SequenceReader.h>
 #include <GAGPL/GAGLIBRARY/LibraryTree.h>
+#include <GAGPL/MISC/Param.h>
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 #include <time.h>
 
 using namespace std;
 using namespace gag;
 using namespace gag::io;
 
-//void printModificationDistribution(const ModificationDistribution& dist, const std::string& mod_name)
-//{
-//  // Print title.
-//  cout << "Position\tModification\tIntensity" << endl;
-//
-//  for(ModificationDistribution::const_iterator iter = dist.begin(); 
-//    iter != dist.end(); iter++)
-//  {
-//    cout << iter->first.printString() << "\t" << mod_name << "\t" << iter->second << endl;
-//  }
-//}
-// argv[1] -- structure file.
-// argv[2] -- spectrum file
-int main(int argc, char **argv)
+namespace po = boost::program_options;
+
+int main(int argc, char *argv[])
 {
   try
   {
-    clock_t t;
-    t = clock();
+    po::options_description desc("Allowed options");
+
+    string compo_file, mono_file, out_file;
+    double error_window;
+    desc.add_options()
+      ("help,h", "Use -h or --help to list all arguments")
+      ("composition,c", po::value<string>(&compo_file), "HS sequence composition and derivation")
+      ("mono-peak-list,m", po::value<string>(&mono_file), "Monoisotopic peak list: m/z, intensity, z")
+      ("output,o", po::value<string>(&out_file), "File for peak assignments")
+      //("library,l", po::value<string>(&lib_file), "File for Fragment library")
+      ("error,e", po::value<double>(&error_window)->default_value(2.0), "Matching error (ppm)");
+
+    po::variables_map vm;
+
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if(argc == 1 || vm.count("help")) {
+      cout << desc << endl;
+      return 0;
+    }
+
+    if(!vm.count("composition") || !vm.count("mono-peak-list")) {
+      cerr << "Option \"composition\"(-c) and \"mono-peak-list\"(-m) are required!" << endl;
+      return 1;
+    }
+
+    // Parse the mono_file string and generate library file.
+    boost::filesystem::path p(mono_file);
+
+
+    if(!vm.count("output")) {
+      boost::filesystem::path assign_path = p.parent_path() / (p.stem().string() + "_dist.txt");
+      out_file = assign_path.string();
+    }
+
+    // Modify the parameter in xml.
+    Param& param = Param::Instance();
+    param.setParameter<double>("matching_error", error_window);
+
+    clock_t t = clock();
+
     SequenceReader seq_reader;
 
-    // 1. Load the sequence from file.
-    std::string structure_filename = "./data/structure/";
-    structure_filename.append(argv[1]);
+    static GlycanSequencePtr gs = boost::make_shared<GlycanSequence>();
+    seq_reader.readSequenceStructure(compo_file, gs);
 
-    GlycanSequencePtr gs = boost::make_shared<GlycanSequence>();
-    seq_reader.readSequenceStructure(structure_filename, gs);
-
-    //SequenceReader seq_reader;
-
-    //// 1. Load the sequence from file.
-    //std::string structure_filename = "../data/structure/";
-    //structure_filename.append(argv[1]);
-
-    //GlycanSequencePtr gs = boost::make_shared<GlycanSequence>();
-    //seq_reader.readSequenceStructure(structure_filename, gs);
-
-    // 2. Load the mono_isotopic peak list from file. The precursor information should be with the spectrum file.
-    std::string mono_filename = "./data/output/";
-    mono_filename.append(argv[2]);
-    mono_filename.append("_mono_list.txt");
-
-    std::set<MonoPeakPtr> mono_set;
-    seq_reader.readMonoPeakList(mono_filename, mono_set);
+    set<MonoPeakPtr> mono_set;
+    seq_reader.readMonoPeakList(mono_file, mono_set);
 
     FragmentTree glyco_tree(gs);
-    std::cout << "Get data size: " << glyco_tree.getNodeSize() << "\n";
+    cout << "Fragment library size: " << glyco_tree.getNodeSize() << "\n";
+
     std::multimap<MonoPeakPtr, NodeItem> node_map = glyco_tree.searchLibrary(mono_set);
 
-    std::cout << "Assignment data size: " << node_map.size() << "\n";
+    cout << "Assignment data size: " << node_map.size() << "\n";
 
     // Predict the structure from the backbone and mass list.
     SequencePrediction seq_predictor(node_map, gs);
 
-    std::set<std::string> mod_types = gs->getModificationTypes();
+    set<string> mod_types = gs->getModificationTypes();
 
-    std::string results_file = "./data/output/";
-    results_file.append(argv[2]);
-    results_file.append("_dist.txt");
-    std::ofstream outfile(results_file.c_str());
+    std::ofstream outfile(out_file.c_str());
 
-    if(outfile.is_open()) throw std::runtime_error("Unable to open the file!");
-
-    outfile << "Position\tModification\tIntensity\n";
-    for(auto iter = mod_types.begin(); iter != mod_types.end(); iter++)
-    {
-      ModificationDistribution mod_dist = seq_predictor.getModificationDistribution(*iter);
-      for(ModificationDistribution::const_iterator mod_iter = mod_dist.begin(); 
-        mod_iter != mod_dist.end(); mod_iter++)
+    if(outfile.is_open()) {
+      outfile << "Residue\tPosition(ResidueID - SiteID)\tModification\tIntensity\n";
+      for(auto iter = mod_types.begin(); iter != mod_types.end(); iter++)
       {
-        outfile << mod_iter->first.printString() << "\t" << *iter << "\t" << mod_iter->second << "\n";
+        ModificationDistribution mod_dist = seq_predictor.getModificationDistribution(*iter);
+        for(ModificationDistribution::const_iterator mod_iter = mod_dist.begin(); mod_iter != mod_dist.end(); mod_iter++)
+        {
+          outfile << gs->getBranchByID(0).getUnitByID(mod_iter->first.getMonosaccharideID()).getSymbol() << "\t";
+          outfile << mod_iter->first.printString() << "\t" << *iter << "\t" << mod_iter->second << "\n";
+        }
+
       }
-      
+      outfile.close();
+
+      cout << "Results were stored in " << out_file << endl;
+      cout << "The match error is " << error_window << " ppm" << endl;
+
+      t = clock() - t;
+
+      cout << "Elapsed time: " << (double)t/CLOCKS_PER_SEC << "s\n";
+    } else {
+      throw std::runtime_error("Unable to open the file: " + out_file);
     }
-    outfile.close();
 
-    ////int ac_num = gs->getModificationConstraint("Ac");
-    //ModificationDistribution ac_dist = seq_predictor.getModificationDistribution("Ac");
-    //printModificationDistribution(ac_dist, "Ac");
-
-    //cout << "*************************************" << endl;
-    //cout << "*   Test 2: Distribution of SO3     *" << endl;
-    //cout << "*************************************" << endl;
-
-    //ModificationDistribution s_dist = seq_predictor.getModificationDistribution("SO3");
-    //cout << "Final distribution of SO3: " << std::endl;
-    ////for(ModificationDistribution::iterator iter = s_dist.begin(); 
-    ////	iter != s_dist.end(); iter++)
-    ////{
-    ////	std::cout << "Modification Position: " << iter->first.getBranchID() << " " << iter->first.getMonosaccharideID() << " " << iter->first.site_id << std::endl;
-    ////	std::cout << "mod intensity: " << iter->second << std::endl;
-    ////}
-
-    //printModificationDistribution(s_dist, "SO3");
-
-    t = clock() - t;
-    //std::cout << "Done!" << std::endl;
-    cout << "Time cost: " << (double)t/CLOCKS_PER_SEC << "s\n";
+    
     //cin.get();
+    return 0;
   }
   catch(std::exception& e)
   {
