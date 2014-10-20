@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Interpreting HS-SEQ sequencing results.
 
 = Introduction =
 
@@ -21,5 +21,3 @@ GlcA	1-2	SO3	0.0293662 <br>
 
 = Notice =
 If a cross-ring cleavage causes significant sulfate loss, the probibility of sulfated sites on the cleaved residue may be wrong, but the total number of sulfate groups on the residue is very likely to be correct. That's one of the advantages of HS-SEQ: error is localized. 
-
-
