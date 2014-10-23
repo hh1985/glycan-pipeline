@@ -12,17 +12,18 @@
 
 #include "GAGPL/SPECTRUM/SimpleFinder.h"
 #include "GAGPL/SPECTRUM/PeakList.h"
-
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <utility>
-#include <boost/algorithm/string.hpp>
-#include <stdlib.h>
+#include <GAGPL/IO/SequenceReader.h>
+#include <GAGPL/MISC/Param.h>
+#include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
+#include <time.h>
 
 using namespace gag;
 using namespace std;
 using namespace param;
+using namespace gag::io;
+
+namespace po = boost::program_options;
 
 RichList readSpectrum(const std::string& filename)
 {
@@ -59,23 +60,127 @@ RichList readSpectrum(const std::string& filename)
 
 int main(int argc, char *argv[])
 {
-	// Test 1
-	//cout << "Test 1: Manual interpretation" << endl;
-
-	//EnvelopFinder env_finder1(spec1);
-
-	//std::vector<EnvelopPtr> env_pool1 = env_finder1.getEnvelops();
-	//BOOST_FOREACH(EnvelopPtr env, env_pool1)
-	//{
-	//	env_finder1.printEnvelop(env);
-	//}
-	// Test 2
-	//cout << endl;
 	try {
-		cout << "Test 2: Real spectrum" << endl;
-		// 1. TBD: Read the data and examine the format of the data.
+    po::options_description desc("Allowed options");
 
-		std::string filename = "./data/spectrum/";
+    string spec_file, out_file;
+    double pre_mz;
+    int pre_z;
+    double error_window;
+
+    desc.add_options()
+      ("help,h", "Use -h or --help to list all arguments")
+      ("spectrum,s", po::value<string>(&spec_file), "Spectrum peak list")
+      ("output,o", po::value<string>(&out_file), "File for monoisotopic peak list")
+      //("library,l", po::value<string>(&lib_file), "File for Fragment library")
+      ("error,e", po::value<double>(&error_window)->default_value(2.0), "Matching error (ppm)")
+      ("precursor,p", po::value<double>(&pre_mz), "Precursor m/z.")
+      ("charge,z", po::value<int>(&pre_z), "Charge state.");
+
+    po::variables_map vm;
+
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if(argc == 1 || vm.count("help")) {
+      cout << desc << endl;
+      return 0;
+    }
+
+    if(!vm.count("spectrum")) {
+      cerr << "Option \"spectrum\"(-s) is required!" << endl;
+      return 1;
+    }
+
+    if(!vm.count("precursor")) {
+      cerr << "Precursor m/z is requried!"<< endl;
+      return 1;
+    }
+
+    if(!vm.count("charge")) {
+      cerr << "Charge state is required!" << endl;
+      return 1;
+    }
+
+    // Parse the mono_file string and generate library file.
+    boost::filesystem::path p(spec_file);
+
+    if(!vm.count("output")) {
+      boost::filesystem::path assign_path = p.parent_path() / (p.stem().string() + "_mono.txt");
+      out_file = assign_path.string();
+    }
+
+    boost::filesystem::path assign_path(out_file);
+    auto alter_path = assign_path.parent_path() / (assign_path.stem().string() + "_undetermined.txt");
+    string alter_file = alter_path.string();
+
+    clock_t t = clock();
+
+    // Modify the parameter in xml.
+    Param& param = Param::Instance();
+    param.setParameter<double>("matching_error", error_window);
+    param.setParameter<double>("precursor_mz", pre_mz);
+    param.setParameter<int>("precursor_charge", pre_z);
+    param.setParameter<std::string>("instrument_type", "ft");
+
+    // threshold for observed peak.
+    param.setParameter<double>("lower_bound_sn",5.0);
+    param.setParameter<double>("learning_rate", 0.01);
+    param.setParameter<double>("max_intensity_shift", 0.3);
+    param.setParameter<int>("max_sulfur_num",6);
+    param.setParameter<int>("num_missing_peaks",1);
+
+
+    RichList spectrum = readSpectrum(spec_file);
+
+    SimpleFinder env_finder2(spectrum);
+
+    std::multimap<RichPeakPtr, EnvelopPtr> env_pool = env_finder2.getEnvelops();
+
+    std::ofstream outfile1(out_file.c_str());
+
+    if(outfile1.is_open()) {
+      outfile1 << "MZ\tIntensity\tCharge\n"; 
+      outfile1.precision(5);
+
+      for(std::multimap<RichPeakPtr, EnvelopPtr>::iterator iter = env_pool.begin(); iter != env_pool.end(); iter++)
+      {
+        env_finder2.printEnvelop(iter->second);
+
+        outfile1 << fixed << iter->first->mz << "\t" << iter->first->intensity << "\t" << iter->second->charge_state << "\n"; 		
+      }
+
+      outfile1.close();
+    } else {
+      throw std::runtime_error("Unable to open the file: " + out_file);
+    }
+
+    std::ofstream outfile2(alter_file.c_str());
+
+    if(outfile2.is_open()) {
+      outfile2 << "MZ\tIntensity\tCharge\n";
+      outfile2.precision(5);
+
+      std::multimap<RichPeakPtr, int>& pks = env_finder2.getUndeterminedPeaks();
+      for(std::multimap<RichPeakPtr, int>::iterator iter = pks.begin(); iter!= pks.end(); iter++) 
+      {
+        if(iter->first->pk_type == "NOISE")
+          continue;
+        outfile2 << fixed << iter->first->mz << "\t" << iter->first->intensity << "\t" << iter->second << "\n";
+      }
+      outfile2.close();
+
+    } else {
+      throw std::runtime_error("Unable to open the file: " + alter_file);
+    }
+
+    cout << "Monoisotopic peak list was stored in " << out_file << endl;
+    cout << "Undetermined monoisotopic peak list was stored in " << alter_file << endl;
+    cout << "The match error is " << error_window << " ppm" << endl;
+
+    t = clock() - t;
+
+		/*std::string filename = "./data/spectrum/";
 		filename.append(argv[1]);
 		filename.append(".txt");
 
@@ -85,11 +190,11 @@ int main(int argc, char *argv[])
 		param.setParameter<double>("precursor_mz", atof(argv[2]));
 		param.setParameter<int>("precursor_charge", atoi(argv[3]));
 
-		// Threshold for most abundant peak in an envelop (mono peak in current case.
-		//param.setParameter<double>("signal_noise", 15.0);
+		 Threshold for most abundant peak in an envelop (mono peak in current case.
+		param.setParameter<double>("signal_noise", 15.0);
 		param.setParameter<std::string>("instrument_type", "ft");
 
-		// threshold for observed peak.
+		 threshold for observed peak.
 		param.setParameter<double>("lower_bound_sn",5.0);
 		param.setParameter<double>("learning_rate", 0.01);
 		param.setParameter<double>("max_intensity_shift", 0.3);
@@ -98,8 +203,10 @@ int main(int argc, char *argv[])
 
 		SimpleFinder env_finder2(spectrum);
 
-		// 2. print the identified envelops.
+		 2. print the identified envelops.
 		std::multimap<RichPeakPtr, EnvelopPtr> env_pool = env_finder2.getEnvelops();
+
+
 
 		cout << "Output the results into file." << endl;
 
@@ -146,7 +253,7 @@ int main(int argc, char *argv[])
 
 		} else {
 			std::cout << "Unable to open file " << und_pks << std::endl;
-		}
+		}*/
 	} catch(std::exception& e) {
 		cout << "Exception: " << e.what() << endl;
 	}
